@@ -1,0 +1,9 @@
+tinyfish
+fastapi
+uvicorn[standard]
+pymongo
+python-dotenv
+apscheduler
+httpx
+agentops
+pydantic-settings
