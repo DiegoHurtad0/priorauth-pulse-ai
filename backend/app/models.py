@@ -40,32 +40,32 @@ class CreatePatientRequest(BaseModel):
         min_length=2,
         max_length=120,
         description="Full patient name, e.g. 'Maria Garcia'",
-        example="Maria Garcia",
+        json_schema_extra={"example": "Maria Garcia"},
     )
     dob: str = Field(
         ...,
         pattern=r"^\d{4}-\d{2}-\d{2}$",
         description="Date of birth in YYYY-MM-DD format",
-        example="1978-03-14",
+        json_schema_extra={"example": "1978-03-14"},
     )
     member_id: str = Field(
         ...,
         min_length=3,
         max_length=50,
         description="Payer member/insurance ID (unique per patient)",
-        example="AET-001-78234",
+        json_schema_extra={"example": "AET-001-78234"},
     )
     cpt_code: str = Field(
         ...,
         description="CPT procedure code for the authorization request",
-        example="27447",
+        json_schema_extra={"example": "27447"},
     )
     payers: list[str] = Field(
         ...,
         min_length=1,
         max_length=5,
         description=f"Payers to monitor. Supported: {sorted(SUPPORTED_PAYERS)}",
-        example=["Aetna", "UnitedHealthcare"],
+        json_schema_extra={"example": ["Aetna", "UnitedHealthcare"]},
     )
 
     @field_validator("cpt_code")
@@ -106,19 +106,19 @@ class GenerateAppealRequest(BaseModel):
     payer_name: str = Field(
         ...,
         description="Payer name for the denied authorization",
-        example="UnitedHealthcare",
+        json_schema_extra={"example": "UnitedHealthcare"},
     )
     denial_reason: str = Field(
         ...,
         min_length=5,
         max_length=500,
         description="The denial reason text from the payer portal",
-        example="Medical necessity documentation insufficient — peer-to-peer review required",
+        json_schema_extra={"example": "Medical necessity documentation insufficient — peer-to-peer review required"},
     )
     auth_number: Optional[str] = Field(
         None,
         description="Original authorization reference number (if available)",
-        example="PA-2026-45123",
+        json_schema_extra={"example": "PA-2026-45123"},
     )
 
     @field_validator("payer_name")
