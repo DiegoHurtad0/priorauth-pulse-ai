@@ -89,6 +89,10 @@ export interface TaskStatusResponse {
   failed?: number;
   success_rate?: number;
   error?: string;
+  streaming_url?: string | null;
+  current_check?: string | null;
+  checks_done?: number;
+  checks_total?: number;
 }
 
 export interface AgentOpsMetrics {

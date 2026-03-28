@@ -128,6 +128,8 @@ async def check_pa_status(
     patient: dict,
     payer_name: str,
     db: Database,
+    task_id: Optional[str] = None,
+    task_store: Optional[dict] = None,
 ) -> Optional[dict]:
     """
     Run a TinyFish SSE agent to check PA status for one patient × payer.
@@ -168,6 +170,9 @@ async def check_pa_status(
                 elif event_type == "STREAMING_URL":
                     url = event.get("streaming_url") if isinstance(event, dict) else getattr(event, "url", None)
                     print(f"  🔴 LIVE BROWSER: {url}")
+                    if task_id and task_store and task_id in task_store:
+                        task_store[task_id]["streaming_url"] = url
+                        task_store[task_id]["current_check"] = f"{patient['name']} — {payer_name}"
 
                 elif event_type == "PROGRESS":
                     purpose = event.get("purpose") if isinstance(event, dict) else getattr(event, "action_description", "")
@@ -228,7 +233,11 @@ async def check_pa_status(
 # Batch check — all active patients × all their payers
 # ─────────────────────────────────────────────
 
-async def run_batch_check(db: Database) -> dict:
+async def run_batch_check(
+    db: Database,
+    task_id: Optional[str] = None,
+    task_store: Optional[dict] = None,
+) -> dict:
     """
     Run PA checks for every active patient across all their assigned payers.
     Executes all checks concurrently via asyncio.gather().
@@ -243,14 +252,24 @@ async def run_batch_check(db: Database) -> dict:
 
     for patient in patients:
         for payer_name in patient.get("payers", []):
-            tasks.append(check_pa_status(patient, payer_name, db))
+            tasks.append(check_pa_status(patient, payer_name, db, task_id=task_id, task_store=task_store))
             task_labels.append(f"{patient['name']} × {payer_name}")
+
+    if task_id and task_store and task_id in task_store:
+        task_store[task_id]["checks_total"] = len(tasks)
 
     total = len(tasks)
     print(f"\n🚀 Starting batch check: {total} PA checks across {len(patients)} patients")
     print(f"   Payers: {list(PAYERS.keys())}\n")
 
-    results = await asyncio.gather(*tasks, return_exceptions=True)
+    async def _tracked(coro):
+        """Wrap a check coroutine to increment checks_done in task_store."""
+        result = await coro
+        if task_id and task_store and task_id in task_store:
+            task_store[task_id]["checks_done"] = task_store[task_id].get("checks_done", 0) + 1
+        return result
+
+    results = await asyncio.gather(*[_tracked(t) for t in tasks], return_exceptions=True)
 
     success = sum(1 for r in results if isinstance(r, dict) and r is not None)
     failed = total - success

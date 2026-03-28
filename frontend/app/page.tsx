@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RefreshCw, Clock } from "lucide-react";
+import { RefreshCw, Clock, Download } from "lucide-react";
 import MetricsBar from "./components/MetricsBar";
 import PatientTable from "./components/PatientTable";
 import PatientModal from "./components/PatientModal";
 import RunCheckButton from "./components/RunCheckButton";
 import AlertToast from "./components/AlertToast";
+import AgentOpsCard from "./components/AgentOpsCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -117,6 +118,38 @@ export default function DashboardPage() {
     setAlerts((prev) => prev.filter((a) => a.id !== id));
   }, []);
 
+  const exportCSV = useCallback(() => {
+    if (patients.length === 0) return;
+    const rows: string[] = [
+      "Patient,Member ID,CPT Code,Payer,Status,Auth #,Decision Date,Expiration Date,Denial Reason,Last Checked",
+    ];
+    for (const p of patients) {
+      for (const check of p.latest_checks) {
+        rows.push(
+          [
+            `"${p.name}"`,
+            p.member_id,
+            p.cpt_code,
+            check.payer_name,
+            check.auth_status,
+            check.auth_number ?? "",
+            check.decision_date ?? "",
+            check.expiration_date ?? "",
+            `"${(check.denial_reason ?? "").replace(/"/g, "'")}"`,
+            check.checked_at,
+          ].join(",")
+        );
+      }
+    }
+    const blob = new Blob([rows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `priorauth-pulse-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [patients]);
+
   return (
     <div className="flex-1 p-6 space-y-6">
       {/* ── Section 1: Metrics ─────────────────── */}
@@ -147,11 +180,30 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Section 3: Patient table ───────────── */}
-      <PatientTable
-        patients={patients}
-        loading={loading}
-        onPatientClick={setSelectedPatient}
-      />
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-slate-400 text-xs">
+            {patients.reduce((n, p) => n + p.payers.length, 0)} authorization checks
+          </span>
+          {patients.length > 0 && (
+            <button
+              onClick={exportCSV}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-700 text-xs font-medium transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export CSV
+            </button>
+          )}
+        </div>
+        <PatientTable
+          patients={patients}
+          loading={loading}
+          onPatientClick={setSelectedPatient}
+        />
+      </div>
+
+      {/* ── AgentOps monitoring card ───────────── */}
+      <AgentOpsCard />
 
       {/* ── Payer coverage strip ───────────────── */}
       {metrics?.supported_payers && metrics.supported_payers.length > 0 && (

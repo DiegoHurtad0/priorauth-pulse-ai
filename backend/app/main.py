@@ -30,6 +30,13 @@ except ImportError:
 from app.core import run_batch_check, PAYERS
 from app.scheduler import start_scheduler, stop_scheduler
 
+
+def _iso_utc(dt: datetime) -> str:
+    """Return ISO 8601 string with explicit UTC suffix so JavaScript parses correctly."""
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.isoformat().replace("+00:00", "Z")
+
 # ── MongoDB connection ───────────────────────
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 mongo_client = MongoClient(MONGO_URI)
@@ -204,7 +211,7 @@ def get_patients():
             )
             if latest:
                 if isinstance(latest.get("checked_at"), datetime):
-                    latest["checked_at"] = latest["checked_at"].isoformat()
+                    latest["checked_at"] = _iso_utc(latest["checked_at"])
                 patient["latest_checks"].append(latest)
 
     return {"patients": patients, "total": len(patients)}
@@ -232,7 +239,7 @@ def get_patient_history(member_id: str, limit: int = 20):
     )
     for c in checks:
         if isinstance(c.get("checked_at"), datetime):
-            c["checked_at"] = c["checked_at"].isoformat()
+            c["checked_at"] = _iso_utc(c["checked_at"])
     return {"member_id": member_id, "checks": checks, "total": len(checks)}
 
 
@@ -240,15 +247,23 @@ def get_patient_history(member_id: str, limit: int = 20):
 async def trigger_batch_check(background_tasks: BackgroundTasks):
     """Trigger a full batch PA check for all active patients."""
     task_id = str(uuid.uuid4())
-    active_tasks[task_id] = {"status": "running", "started_at": datetime.now(timezone.utc).isoformat()}
+    active_tasks[task_id] = {
+        "status": "running",
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "streaming_url": None,
+        "current_check": None,
+        "checks_done": 0,
+        "checks_total": 0,
+    }
 
     async def run_and_update():
         try:
-            summary = await run_batch_check(db)
+            summary = await run_batch_check(db, task_id=task_id, task_store=active_tasks)
             active_tasks[task_id] = {
                 "status": "completed",
                 "started_at": active_tasks[task_id]["started_at"],
                 "completed_at": datetime.now(timezone.utc).isoformat(),
+                "streaming_url": active_tasks[task_id].get("streaming_url"),
                 **summary,
             }
         except Exception as e:
@@ -284,7 +299,7 @@ def get_recent_checks(limit: int = 50):
     )
     for c in checks:
         if isinstance(c.get("checked_at"), datetime):
-            c["checked_at"] = c["checked_at"].isoformat()
+            c["checked_at"] = _iso_utc(c["checked_at"])
     return {"checks": checks, "total": len(checks)}
 
 
