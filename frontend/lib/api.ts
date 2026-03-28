@@ -190,3 +190,24 @@ export async function getTaskStatus(
 export async function getAgentOpsMetrics(): Promise<AgentOpsMetrics | null> {
   return get<AgentOpsMetrics>("/agentops/metrics");
 }
+
+export interface AppealResponse {
+  member_id: string;
+  payer_name: string;
+  letter: string;
+  generated_at: string;
+}
+
+/** Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6. */
+export async function generateAppealLetter(
+  memberId: string,
+  payerName: string,
+  denialReason: string,
+  authNumber?: string | null
+): Promise<AppealResponse | null> {
+  return post<AppealResponse>(`/patients/${encodeURIComponent(memberId)}/appeal`, {
+    payer_name: payerName,
+    denial_reason: denialReason,
+    auth_number: authNumber,
+  });
+}
