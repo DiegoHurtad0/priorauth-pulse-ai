@@ -147,6 +147,7 @@ async def check_pa_status(
     goal = build_goal(patient, payer)
     result: Optional[dict] = None
     run_id: Optional[str] = None
+    streaming_url: Optional[str] = None
 
     print(f"\n  ▶ Checking {payer_name} for {patient['name']} ({patient['member_id']})")
 
@@ -169,6 +170,7 @@ async def check_pa_status(
 
                 elif event_type == "STREAMING_URL":
                     url = event.get("streaming_url") if isinstance(event, dict) else getattr(event, "url", None)
+                    streaming_url = url  # persist to MongoDB doc
                     print(f"  🔴 LIVE BROWSER: {url}")
                     if task_id and task_store and task_id in task_store:
                         task_store[task_id]["streaming_url"] = url
@@ -210,6 +212,7 @@ async def check_pa_status(
         "member_id": patient["member_id"],
         "status_changed": status_changed,
         "run_id": run_id,
+        "streaming_url": streaming_url,  # TinyFish replay URL for observability
         "checked_at": datetime.now(timezone.utc),
     }
     db.pa_checks.insert_one(doc)

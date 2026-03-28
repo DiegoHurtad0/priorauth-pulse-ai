@@ -101,6 +101,7 @@ export interface AgentOpsMetrics {
   avg_duration_seconds: number;
   last_24h_runs: number;
   last_24h_success_rate: number;
+  session_replay_url?: string | null;
   top_payers: { name: string; runs: number; success_rate: number }[];
 }
 

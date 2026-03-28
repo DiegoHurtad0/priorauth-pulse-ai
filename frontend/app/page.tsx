@@ -571,6 +571,30 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Tech Stack ────────────────────────────── */}
+      <section className="py-16 px-6 border-t border-slate-800">
+        <div className="max-w-5xl mx-auto">
+          <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest text-center mb-8">
+            Built with the full TinyFish partner stack
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {[
+              { name: "TinyFish", role: "Web Agent", color: "text-blue-400", bg: "bg-blue-500/5 border-blue-500/20" },
+              { name: "Claude claude-opus-4-6", role: "Appeal Letters", color: "text-violet-400", bg: "bg-violet-500/5 border-violet-500/20" },
+              { name: "MongoDB", role: "Storage", color: "text-emerald-400", bg: "bg-emerald-500/5 border-emerald-500/20" },
+              { name: "AgentOps", role: "Monitoring", color: "text-amber-400", bg: "bg-amber-500/5 border-amber-500/20" },
+              { name: "FastAPI", role: "Backend", color: "text-teal-400", bg: "bg-teal-500/5 border-teal-500/20" },
+              { name: "Next.js 14", role: "Frontend", color: "text-slate-300", bg: "bg-slate-700/30 border-slate-600/30" },
+            ].map(({ name, role, color, bg }) => (
+              <div key={name} className={`border rounded-xl p-4 text-center ${bg}`}>
+                <p className={`text-sm font-bold ${color} mb-0.5`}>{name}</p>
+                <p className="text-slate-600 text-xs">{role}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Pricing ───────────────────────────────── */}
       <section className="py-20 px-6 border-t border-slate-800" id="pricing">
         <div className="max-w-5xl mx-auto">
@@ -639,7 +663,7 @@ export default function LandingPage() {
           <p className="text-slate-400 text-lg mb-10">
             See the live demo — 15 patients, 5 payers, real TinyFish agent running. Denied cases include AI-generated appeal letters.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
             <Link
               href="/dashboard"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-bold text-base transition-colors shadow-lg shadow-blue-500/25"
@@ -648,6 +672,13 @@ export default function LandingPage() {
               Open Live Dashboard
               <ArrowRight className="w-4 h-4" />
             </Link>
+            <a
+              href="mailto:diegohurtado@example.com?subject=PriorAuth%20Pulse%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20schedule%20a%20demo%20of%20PriorAuth%20Pulse."
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 font-bold text-base transition-colors"
+            >
+              <Users className="w-5 h-5" />
+              Book a Demo
+            </a>
             <a
               href={`https://twitter.com/intent/tweet?text=${twitterText}`}
               target="_blank"
