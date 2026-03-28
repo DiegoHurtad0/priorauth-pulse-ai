@@ -208,15 +208,25 @@ Every response carries `X-Process-Time` and `X-Request-ID` headers. Validation e
 
 ## Setup
 
-### Prerequisites
-
 ```bash
 # Clone
 git clone https://github.com/DiegoHurtad0/priorauth-pulse-ai
 cd priorauth-pulse-ai
 ```
 
-### Backend
+### Option A — Docker (recommended)
+
+```bash
+cp backend/.env.example backend/.env   # Fill in API keys
+docker compose up
+# → Backend at http://localhost:8000
+# → Frontend at http://localhost:3000
+# → MongoDB at localhost:27017
+```
+
+### Option B — Manual
+
+**Backend**
 
 ```bash
 cd backend
@@ -225,7 +235,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### Frontend
+**Frontend**
 
 ```bash
 cd frontend
