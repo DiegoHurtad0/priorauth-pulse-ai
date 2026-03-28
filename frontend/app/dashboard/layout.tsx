@@ -70,8 +70,8 @@ export default function DashboardLayout({
           </p>
         </div>
 
-        {/* Footer — TinyFish attribution */}
-        <div className="px-4 py-4 border-t border-slate-800">
+        {/* Footer — TinyFish attribution + GitHub */}
+        <div className="px-4 py-4 border-t border-slate-800 space-y-2">
           <a
             href="https://tinyfish.ai"
             target="_blank"
@@ -84,9 +84,16 @@ export default function DashboardLayout({
             </span>
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
-          <p className="text-slate-600 text-xs mt-1">
-            81% accuracy on Mind2Web
-          </p>
+          <p className="text-slate-600 text-xs">81% accuracy on Mind2Web</p>
+          <a
+            href="https://github.com/DiegoHurtad0/priorauth-pulse-ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-400 transition-colors"
+          >
+            <span className="text-xs">#BuildInPublic</span>
+            <ExternalLink className="w-3 h-3 opacity-60" />
+          </a>
         </div>
       </aside>
 
