@@ -29,6 +29,7 @@ except ImportError:
 
 from app.core import run_batch_check, PAYERS
 from app.scheduler import start_scheduler, stop_scheduler
+from app.appeal import generate_appeal_letter
 
 # ── MongoDB connection ───────────────────────
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
@@ -330,3 +331,38 @@ def get_metrics():
         "supported_payers": list(PAYERS.keys()),
         "avg_check_duration_seconds": 134.0,
     }
+
+
+@app.post("/patients/{member_id}/appeal")
+async def generate_appeal(member_id: str, body: dict):
+    """
+    Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6.
+    Body: { payer_name, denial_reason, auth_number? }
+    """
+    # Look up patient in DB
+    patient = db.patients.find_one({"member_id": member_id}, {"_id": 0})
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+
+    payer_name = body.get("payer_name", "")
+    denial_reason = body.get("denial_reason", "Medical necessity not established")
+    auth_number = body.get("auth_number")
+
+    try:
+        letter = await generate_appeal_letter(
+            patient_name=patient["name"],
+            member_id=member_id,
+            dob=patient.get("dob", ""),
+            cpt_code=patient.get("cpt_code", ""),
+            payer_name=payer_name,
+            denial_reason=denial_reason,
+            auth_number=auth_number,
+        )
+        return {
+            "member_id": member_id,
+            "payer_name": payer_name,
+            "letter": letter,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Letter generation failed: {e}")

@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     MONGO_URI: str = ""
     AGENTOPS_API_KEY: str = ""
     COMPOSIO_WEBHOOK_URL: str = ""
+    ANTHROPIC_API_KEY: str = ""
     PORT: int = 8000
 
     class Config:

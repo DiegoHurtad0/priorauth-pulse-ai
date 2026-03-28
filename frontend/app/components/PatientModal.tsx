@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { X, ArrowRight, Calendar, Hash, User, Stethoscope } from "lucide-react";
+import { X, ArrowRight, Calendar, Hash, Stethoscope, Sparkles } from "lucide-react";
 import StatusBadge from "./StatusBadge";
+import AppealModal from "./AppealModal";
 import { getPatientHistory } from "@/lib/api";
 import type { Patient, PACheck } from "@/lib/api";
 
@@ -46,6 +47,7 @@ function formatDateOnly(iso: string | null | undefined): string {
 export default function PatientModal({ patient, onClose }: PatientModalProps) {
   const [history, setHistory] = useState<PACheck[]>([]);
   const [loading, setLoading] = useState(false);
+  const [appealCheck, setAppealCheck] = useState<PACheck | null>(null);
 
   const fetchHistory = useCallback(async () => {
     if (!patient) return;
@@ -75,7 +77,8 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
   if (!patient) return null;
 
   return (
-    /* Backdrop */
+    <>
+    {/* Backdrop */}
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
       onClick={(e) => {
@@ -134,6 +137,16 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
                     <StatusBadge status={latest.auth_status} size="sm" showDot={false} />
                   ) : (
                     <span className="text-slate-500 text-xs">No data</span>
+                  )}
+                  {latest?.auth_status === "Denied" && (
+                    <button
+                      onClick={() => setAppealCheck(latest)}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-violet-500/15 hover:bg-violet-500/25 text-violet-400 text-xs transition-colors"
+                      title="Generate appeal letter"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      Appeal
+                    </button>
                   )}
                 </div>
               );
@@ -220,6 +233,16 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
                       </p>
                     )}
 
+                    {check.auth_status === "Denied" && (
+                      <button
+                        onClick={() => setAppealCheck(check)}
+                        className="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-violet-400 text-xs font-medium transition-colors"
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        Generate Appeal Letter
+                      </button>
+                    )}
+
                     {check.expiration_date && (
                       <p className="text-slate-500 text-xs mt-1">
                         Expires:{" "}
@@ -236,5 +259,15 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
         </div>
       </div>
     </div>
+
+    {/* Appeal letter modal (stacked on top) */}
+    {appealCheck && patient && (
+      <AppealModal
+        patient={patient}
+        deniedCheck={appealCheck}
+        onClose={() => setAppealCheck(null)}
+      />
+    )}
+    </>
   );
 }
