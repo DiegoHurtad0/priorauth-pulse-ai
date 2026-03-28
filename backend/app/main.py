@@ -9,9 +9,10 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from pymongo import MongoClient, DESCENDING
+from fastapi.responses import JSONResponse
+from pymongo import MongoClient, ASCENDING, DESCENDING
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -204,11 +205,41 @@ def seed_demo_data():
 
 
 # ── Lifecycle events ─────────────────────────
+def ensure_indexes():
+    """Create MongoDB indexes for query performance. Safe to call on every startup (idempotent)."""
+    # patients: member_id is the natural primary key for lookups
+    db.patients.create_index("member_id", unique=True, background=True)
+    # pa_checks: the three most common query patterns
+    db.pa_checks.create_index([("member_id", ASCENDING), ("payer_name", ASCENDING)], background=True)
+    db.pa_checks.create_index([("checked_at", ASCENDING)], background=True)  # range queries in /metrics
+    db.pa_checks.create_index([("payer_name", ASCENDING), ("auth_status", ASCENDING)], background=True)  # /analytics/payers
+    print("✅ MongoDB indexes ensured")
+
+
 @app.on_event("startup")
 async def startup():
+    ensure_indexes()
     seed_demo_data()
     start_scheduler(db)
     print("🚀 PriorAuth Pulse backend running")
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Return consistent JSON error envelope for unhandled exceptions."""
+    if isinstance(exc, HTTPException):
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"error": exc.detail, "status_code": exc.status_code},
+        )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "status_code": 500,
+            "message": str(exc) if os.getenv("DEBUG") else "An unexpected error occurred",
+        },
+    )
 
 
 @app.on_event("shutdown")
