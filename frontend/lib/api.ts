@@ -35,6 +35,7 @@ export interface PACheck {
   extraction_timestamp: string;
   status_changed: boolean;
   run_id: string | null;
+  streaming_url: string | null;
   checked_at: string;
 }
 

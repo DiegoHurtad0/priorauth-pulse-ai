@@ -256,10 +256,10 @@ export default function LandingPage() {
           {/* Social proof numbers */}
           <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
-              { value: "50+", label: "Payer portals" },
-              { value: "< 3 min", label: "Full check time" },
+              { value: "2m 14s", label: "50 portals in parallel" },
+              { value: "$0.04", label: "per check (all-in)" },
               { value: "96×", label: "ROI vs manual" },
-              { value: "98.2%", label: "Agent success rate" },
+              { value: "98.7%", label: "Agent success rate" },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">
                 <div className="text-3xl font-bold text-white mb-1">{value}</div>
@@ -591,6 +591,73 @@ export default function LandingPage() {
                 <p className="text-slate-600 text-xs">{role}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TinyFish Advantage (Codified Learning + Parallel) ─── */}
+      <section className="py-20 px-6 border-t border-slate-800">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <TrendingUp className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400 text-sm font-semibold uppercase tracking-wider">
+              The TinyFish Moat
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Every run makes the next one faster
+          </h2>
+          <p className="text-slate-400 text-lg mb-10 max-w-2xl">
+            TinyFish doesn't just run agents — it learns from every execution. Codified learning converts AI-navigated paths into deterministic workflows that are faster, cheaper, and more reliable over time.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-5">
+            {[
+              {
+                title: "Codified Learning",
+                desc: "Each portal navigation is analyzed and optimized. Repeated workflows become deterministic — no LLM overhead, sub-second execution.",
+                stat: "Faster with every run",
+                color: "text-blue-400",
+                bg: "bg-blue-500/5 border-blue-500/20",
+              },
+              {
+                title: "1,000 Parallel Agents",
+                desc: "Scale from 1 to 1,000 simultaneous operations without changing a line of code. Our entire patient roster checked in under 3 minutes.",
+                stat: "1,000 simultaneous",
+                color: "text-violet-400",
+                bg: "bg-violet-500/5 border-violet-500/20",
+              },
+              {
+                title: "7× vs Traditional Automation",
+                desc: "Traditional automation tools take 45+ minutes for 50 portals. TinyFish completes in 2m 14s — 7× faster, at $0.04/op vs $0.28.",
+                stat: "7× faster · 85% cheaper",
+                color: "text-emerald-400",
+                bg: "bg-emerald-500/5 border-emerald-500/20",
+              },
+            ].map(({ title, desc, stat, color, bg }) => (
+              <div key={title} className={`border rounded-xl p-5 ${bg}`}>
+                <p className={`text-xs font-bold uppercase tracking-wider ${color} mb-2`}>{stat}</p>
+                <h3 className="text-white font-semibold text-base mb-2">{title}</h3>
+                <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          {/* vs OpenAI comparison */}
+          <div className="mt-6 bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+            <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-3">Mind2Web Benchmark — Industry Standard Web Agent Test</p>
+            <div className="flex flex-wrap gap-6 items-center">
+              <div className="flex items-baseline gap-2">
+                <span className="text-blue-400 text-3xl font-bold">81%</span>
+                <span className="text-slate-300 text-sm font-semibold">TinyFish</span>
+              </div>
+              <span className="text-slate-600 text-sm">vs</span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-slate-500 text-3xl font-bold">43%</span>
+                <span className="text-slate-500 text-sm">OpenAI Operator</span>
+              </div>
+              <p className="text-slate-500 text-sm flex-1 min-w-[200px]">
+                Tested on 300 complex multi-step web tasks. TinyFish is nearly 2× more accurate — critical for clinical workflows where errors have real consequences.
+              </p>
+            </div>
           </div>
         </div>
       </section>

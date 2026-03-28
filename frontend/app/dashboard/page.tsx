@@ -10,6 +10,7 @@ import RunCheckButton from "../components/RunCheckButton";
 import AlertToast from "../components/AlertToast";
 import AgentOpsCard from "../components/AgentOpsCard";
 import PayerAnalyticsCard from "../components/PayerAnalyticsCard";
+import TinyFishRunsCard from "../components/TinyFishRunsCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -220,6 +221,9 @@ export default function DashboardPage() {
         <AgentOpsCard />
       </div>
 
+      {/* ── TinyFish Live Runs ──────────────────── */}
+      <TinyFishRunsCard />
+
       {/* ── Payer coverage strip ───────────────── */}
       {metrics?.supported_payers && metrics.supported_payers.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
@@ -257,6 +261,11 @@ export default function DashboardPage() {
               <p className="text-emerald-400/70 text-xs">After</p>
               <p className="text-emerald-400 text-lg font-bold">$199/mo</p>
               <p className="text-slate-500 text-xs">Unlimited patients</p>
+            </div>
+            <div>
+              <p className="text-blue-400/70 text-xs">TinyFish cost</p>
+              <p className="text-blue-400 text-lg font-bold">$0.04</p>
+              <p className="text-slate-500 text-xs">per PA check (all-in)</p>
             </div>
           </div>
         </div>
