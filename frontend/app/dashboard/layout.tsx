@@ -94,6 +94,15 @@ export default function DashboardLayout({
             <span className="text-xs">#BuildInPublic</span>
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
+          <a
+            href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/docs`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-400 transition-colors"
+          >
+            <span className="text-xs">API Docs (Swagger)</span>
+            <ExternalLink className="w-3 h-3 opacity-60" />
+          </a>
         </div>
       </aside>
 
