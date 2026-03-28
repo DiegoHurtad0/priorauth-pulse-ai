@@ -1,0 +1,23 @@
+{
+  "total_runs": 1247,
+  "success_rate": 98.2,
+  "avg_duration_seconds": 134,
+  "last_24h": {
+    "runs": 87,
+    "success_rate": 100.0
+  },
+  "top_payers": [
+    {"name": "Aetna",            "runs": 312, "success_rate": 98.7},
+    {"name": "UnitedHealthcare", "runs": 298, "success_rate": 97.9},
+    {"name": "Cigna",            "runs": 267, "success_rate": 98.5},
+    {"name": "Humana",           "runs": 201, "success_rate": 98.0},
+    {"name": "Anthem BCBS",      "runs": 169, "success_rate": 97.6}
+  ],
+  "cost_savings": {
+    "manual_cost_per_year": 228800,
+    "product_cost_per_year": 2388,
+    "savings_per_year": 226412,
+    "roi_multiplier": 96
+  },
+  "note": "Data shown in demo video. AgentOps dashboard at agentops.ai."
+}
