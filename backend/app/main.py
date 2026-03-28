@@ -404,6 +404,38 @@ def get_payer_analytics():
     return {"payers": results}
 
 
+@app.get("/goal-preview/{member_id}/{payer_name}")
+def get_goal_preview(member_id: str, payer_name: str):
+    """
+    Return the exact TinyFish goal prompt that would be sent for a given
+    patient × payer combination. Useful for demonstrating prompt engineering.
+    """
+    from app.core import build_goal, PAYERS
+    patient = db.patients.find_one({"member_id": member_id}, {"_id": 0})
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    payer = PAYERS.get(payer_name)
+    if not payer:
+        raise HTTPException(status_code=404, detail=f"Unsupported payer: {payer_name}")
+    goal = build_goal(patient, payer)
+    return {
+        "member_id": member_id,
+        "payer_name": payer_name,
+        "patient_name": patient["name"],
+        "goal": goal,
+        "goal_length_chars": len(goal),
+        "prompting_level": "Level 3 — Production-ready",
+        "features": [
+            "Explicit navigation steps with visual element cues",
+            "Strict JSON schema with field type annotations",
+            "Cross-step memory instructions",
+            "Explicit termination condition",
+            "8 edge case handlers",
+            "4 strict guardrails",
+        ],
+    }
+
+
 @app.post("/patients/{member_id}/appeal")
 async def generate_appeal(member_id: str, body: dict):
     """

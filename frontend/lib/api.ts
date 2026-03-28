@@ -200,6 +200,26 @@ export interface AppealResponse {
   generated_at: string;
 }
 
+export interface GoalPreviewResponse {
+  member_id: string;
+  payer_name: string;
+  patient_name: string;
+  goal: string;
+  goal_length_chars: number;
+  prompting_level: string;
+  features: string[];
+}
+
+/** Fetch the exact TinyFish goal prompt for a patient × payer combination. */
+export async function getGoalPreview(
+  memberId: string,
+  payerName: string
+): Promise<GoalPreviewResponse | null> {
+  return get<GoalPreviewResponse>(
+    `/goal-preview/${encodeURIComponent(memberId)}/${encodeURIComponent(payerName)}`
+  );
+}
+
 /** Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6. */
 export async function generateAppealLetter(
   memberId: string,

@@ -59,64 +59,84 @@ PAYERS: dict[str, dict] = {
 
 def build_goal(patient: dict, payer: dict) -> str:
     """
-    Build the TinyFish goal prompt for a specific patient × payer check.
-    Follows TinyFish Prompting Guide best practices:
-    - Specific steps (not vague)
-    - Strict JSON schema
-    - Edge case handling
-    - Guardrails (what NOT to do)
+    Level 3 Production-ready TinyFish goal prompt.
+    Built following TinyFish Prompting Guide best practices:
+    - Specific navigation steps with visual element cues (4.9× faster than vague goals)
+    - Strict JSON schema with field types (16× less unnecessary data)
+    - Cross-step memory instructions
+    - Explicit termination condition
+    - Comprehensive edge case handling
+    - Clear guardrails (what NOT to do)
     """
-    return f"""You are navigating a health insurance payer portal to check the status of a prior authorization request.
+    return f"""# OBJECTIVE
+Retrieve the current prior authorization (PA) status for one specific patient from the {payer['name']} provider portal. Extract all structured fields and return them as a single JSON object. Do not perform any other action.
 
-Steps:
-1. Log in using the credentials provided via vault
-2. Navigate to the "Prior Authorization" or "Authorization Status" section
-3. Search for the patient using this information:
-   - Patient Name: {patient['name']}
-   - Date of Birth: {patient['dob']}
-   - Member ID: {patient['member_id']}
-4. Locate the most recent prior authorization request for CPT code: {patient['cpt_code']}
-5. Extract the authorization details listed below
+# TARGET
+Site: {payer['url']}
+Payer: {payer['name']}
+Portal type: Health insurance provider portal with authenticated login
 
-Required fields to extract:
-- auth_status: one of exactly: "Approved", "Pending", "Denied", "Info Needed", "In Review", "Expired"
-- auth_number: the authorization reference number if approved/denied (string or null)
-- decision_date: date in YYYY-MM-DD format (or null)
-- expiration_date: date in YYYY-MM-DD format (or null)
-- requesting_provider: name of the requesting provider (or null)
-- service_description: brief description of the service being authorized (or null)
-- denial_reason: detailed reason if status is "Denied" (or null)
-- next_action_required: what the provider needs to do next, if anything (or null)
+# PATIENT IDENTITY
+- Full Name: {patient['name']}
+- Date of Birth: {patient['dob']}
+- Member ID: {patient['member_id']}
+- CPT Code to match: {patient['cpt_code']}
 
-Edge cases — handle these automatically:
-- If a cookie banner or consent popup appears: close or dismiss it immediately before proceeding
-- If MFA is required: complete the MFA step using the authenticator credentials from vault
-- If the patient has multiple PA requests: select the one matching CPT code {patient['cpt_code']}
-- If no PA is found for this patient: return auth_status as "Not Found"
-- If the portal shows a maintenance or unavailability page: return auth_status as "Portal Unavailable"
-- If the session expires mid-navigation: attempt re-login once, then return "Portal Unavailable" if it fails
+# NAVIGATION STEPS
+Step 1 — LOGIN
+  Log in using vault credentials. If a cookie banner, privacy notice, or consent popup appears, close or dismiss it immediately before proceeding. If a "session expired" or "login again" message appears, re-login once using vault credentials.
 
-Return ONLY this JSON (no extra text or explanation):
+Step 2 — MFA (if required)
+  If multi-factor authentication is required, complete it using the authenticator credentials stored in vault. Remember any verification code you enter — you may need to reference it.
+
+Step 3 — LOCATE PRIOR AUTHORIZATION SECTION
+  Navigate to the section labeled "Prior Authorization", "Authorization Status", "Auth Status", or "Prior Auth Lookup". This is usually found in the main navigation under "Clinical", "Patient", or "Authorization" tabs.
+
+Step 4 — SEARCH FOR PATIENT
+  Search using Member ID "{patient['member_id']}" first. If no results, try searching by Full Name "{patient['name']}" combined with Date of Birth "{patient['dob']}". Use exact values — do not abbreviate.
+
+Step 5 — IDENTIFY THE CORRECT PA REQUEST
+  If multiple PA requests exist for this patient, select the most recent one that matches CPT code {patient['cpt_code']}. If CPT code is not displayed, match by service description or procedure name.
+
+Step 6 — EXTRACT ALL FIELDS
+  On the PA detail page, extract every field listed in the OUTPUT SCHEMA section below. For each field, read the exact value displayed — do not infer or paraphrase.
+
+# TERMINATION CONDITION
+Stop navigating as soon as you have extracted all required fields from Step 6. Do not continue browsing after extraction is complete.
+
+# OUTPUT SCHEMA
+Return ONLY this JSON object — no preamble, no explanation, no markdown:
 {{
   "patient_name": "{patient['name']}",
   "member_id": "{patient['member_id']}",
   "payer_name": "{payer['name']}",
-  "auth_status": "string",
-  "auth_number": "string or null",
-  "decision_date": "YYYY-MM-DD or null",
-  "expiration_date": "YYYY-MM-DD or null",
-  "requesting_provider": "string or null",
-  "service_description": "string or null",
-  "denial_reason": "string or null",
-  "next_action_required": "string or null",
-  "extraction_timestamp": "ISO 8601 timestamp"
+  "auth_status": "<ENUM: Approved | Pending | Denied | Info Needed | In Review | Expired | Not Found | Portal Unavailable>",
+  "auth_number": "<string: authorization reference number, or null if not yet assigned>",
+  "decision_date": "<string: YYYY-MM-DD format, or null>",
+  "expiration_date": "<string: YYYY-MM-DD format, or null>",
+  "requesting_provider": "<string: name of the requesting/ordering provider, or null>",
+  "service_description": "<string: brief description of the authorized service/procedure, or null>",
+  "denial_reason": "<string: full denial reason text if status is Denied, or null>",
+  "next_action_required": "<string: what the provider must do next (e.g. submit peer-to-peer, provide clinical notes), or null>",
+  "extraction_timestamp": "<string: current UTC datetime in ISO 8601 format>"
 }}
 
-IMPORTANT GUARDRAILS:
-- Do NOT click any "Submit New Authorization" or "Request New Auth" buttons
-- Do NOT click any "Cancel Authorization" or "Withdraw" buttons
-- Do NOT modify any existing authorization data
-- Do NOT navigate to any section unrelated to authorization status lookup
+# EDGE CASES — handle automatically
+- Cookie/consent banner: dismiss immediately before any other action
+- MFA required: complete using vault authenticator credentials
+- Session timeout mid-navigation: attempt one re-login, then return auth_status "Portal Unavailable"
+- Multiple PA requests for same patient: use CPT code {patient['cpt_code']} to identify the correct one
+- PA request not found: return auth_status "Not Found", all other fields null
+- Portal maintenance or error page: return auth_status "Portal Unavailable", all other fields null
+- Partial data (some fields missing from portal): return available fields, null for missing ones
+- Date displayed in M/D/YYYY format: convert to YYYY-MM-DD in output
+
+# GUARDRAILS — strict prohibitions
+- Do NOT click "Submit New Authorization", "Request New Auth", or any button that creates a new PA
+- Do NOT click "Cancel Authorization", "Withdraw Request", or any destructive action
+- Do NOT modify, update, or edit any existing authorization data
+- Do NOT navigate to sections unrelated to authorization status lookup
+- Do NOT submit any forms other than the patient search form
 """
 
 

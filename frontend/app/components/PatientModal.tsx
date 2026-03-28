@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { X, ArrowRight, Calendar, Hash, Stethoscope, Sparkles } from "lucide-react";
+import { X, ArrowRight, Calendar, Hash, Stethoscope, Sparkles, Code2, ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import AppealModal from "./AppealModal";
-import { getPatientHistory } from "@/lib/api";
-import type { Patient, PACheck } from "@/lib/api";
+import { getPatientHistory, getGoalPreview } from "@/lib/api";
+import type { Patient, PACheck, GoalPreviewResponse } from "@/lib/api";
 
 interface PatientModalProps {
   patient: Patient | null;
@@ -48,6 +48,10 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
   const [history, setHistory] = useState<PACheck[]>([]);
   const [loading, setLoading] = useState(false);
   const [appealCheck, setAppealCheck] = useState<PACheck | null>(null);
+  const [goalPreview, setGoalPreview] = useState<GoalPreviewResponse | null>(null);
+  const [showGoal, setShowGoal] = useState(false);
+  const [loadingGoal, setLoadingGoal] = useState(false);
+  const [goalPayer, setGoalPayer] = useState<string | null>(null);
 
   const fetchHistory = useCallback(async () => {
     if (!patient) return;
@@ -64,6 +68,20 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
       setHistory([]);
     }
   }, [patient, fetchHistory]);
+
+  const handleViewGoal = async (payerName: string) => {
+    if (!patient) return;
+    if (goalPayer === payerName && showGoal) {
+      setShowGoal(false);
+      return;
+    }
+    setGoalPayer(payerName);
+    setShowGoal(true);
+    setLoadingGoal(true);
+    const res = await getGoalPreview(patient.member_id, payerName);
+    setGoalPreview(res);
+    setLoadingGoal(false);
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -148,10 +166,72 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
                       Appeal
                     </button>
                   )}
+                  <button
+                    onClick={() => handleViewGoal(payer)}
+                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-xs transition-colors"
+                    title="View TinyFish goal prompt"
+                  >
+                    <Code2 className="w-3 h-3" />
+                    Goal
+                    {goalPayer === payer && showGoal ? (
+                      <ChevronUp className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
+                  </button>
                 </div>
               );
             })}
           </div>
+
+          {/* Goal preview panel */}
+          {showGoal && goalPayer && (
+            <div className="mt-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 overflow-hidden">
+              <div className="flex items-center justify-between px-3 py-2 border-b border-emerald-500/15">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-300 text-xs font-semibold">
+                    TinyFish Goal Prompt — {goalPayer}
+                  </span>
+                  {goalPreview && (
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs">
+                      {goalPreview.prompting_level}
+                    </span>
+                  )}
+                </div>
+                {goalPreview && (
+                  <span className="text-slate-500 text-xs">
+                    {goalPreview.goal_length_chars.toLocaleString()} chars
+                  </span>
+                )}
+              </div>
+              {loadingGoal ? (
+                <div className="px-3 py-4 text-slate-500 text-xs animate-pulse">
+                  Loading goal prompt…
+                </div>
+              ) : goalPreview ? (
+                <>
+                  <div className="flex flex-wrap gap-1.5 px-3 py-2 border-b border-emerald-500/10">
+                    {goalPreview.features.map((f) => (
+                      <span
+                        key={f}
+                        className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-xs"
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                  <pre className="px-3 py-2 text-xs text-slate-300 font-mono overflow-x-auto max-h-48 whitespace-pre-wrap leading-relaxed">
+                    {goalPreview.goal}
+                  </pre>
+                </>
+              ) : (
+                <div className="px-3 py-4 text-red-400 text-xs">
+                  Failed to load goal prompt.
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* History timeline */}
