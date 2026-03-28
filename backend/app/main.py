@@ -4,6 +4,7 @@ Endpoints: health, patients, run-check, pa-checks, metrics
 """
 
 import os
+import time
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional
@@ -65,6 +66,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.middleware("http")
+async def add_observability_headers(request, call_next):
+    """Add X-Process-Time and X-Request-ID to every response for production observability."""
+    start = time.monotonic()
+    request_id = str(uuid.uuid4())[:8]
+    response = await call_next(request)
+    ms = round((time.monotonic() - start) * 1000, 1)
+    response.headers["X-Process-Time"] = f"{ms}ms"
+    response.headers["X-Request-ID"] = request_id
+    return response
+
 
 # ── In-memory task status store ──────────────
 active_tasks: dict[str, dict] = {}
