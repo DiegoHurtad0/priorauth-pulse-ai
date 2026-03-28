@@ -21,6 +21,8 @@ import {
   Check,
   Timer,
   Sparkles,
+  Globe,
+  XCircle,
 } from "lucide-react";
 
 const PAYERS = [
@@ -713,6 +715,98 @@ export default function LandingPage() {
                 </Link>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Market Opportunity ────────────────────── */}
+      <section className="py-20 px-6 border-t border-slate-800 bg-slate-900/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <Globe className="w-5 h-5 text-blue-400" />
+            <span className="text-blue-400 text-sm font-semibold uppercase tracking-wider">
+              Market Opportunity
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+            $14.6B problem. Zero AI-native solutions. Until now.
+          </h2>
+          <p className="text-slate-400 text-lg mb-10 max-w-2xl">
+            Prior authorization administration costs the US healthcare system $14.6B/year — and no payer has a public API. The entire market runs on manual clicks.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-5 mb-10">
+            {[
+              {
+                label: "TAM",
+                title: "Total Addressable Market",
+                value: "$14.6B",
+                desc: "Annual PA administrative burden across all US healthcare (CAQH 2024)",
+                color: "text-blue-400",
+                bg: "bg-blue-500/5 border-blue-500/20",
+              },
+              {
+                label: "SAM",
+                title: "Serviceable Addressable Market",
+                value: "$780M",
+                desc: "65,000 specialty practices (oncology, orthopedics, cardiology) × $12K/yr avg",
+                color: "text-violet-400",
+                bg: "bg-violet-500/5 border-violet-500/20",
+              },
+              {
+                label: "SOM",
+                title: "Year 1 Target",
+                value: "$4.8M ARR",
+                desc: "2,000 early adopters at $199/mo Pro plan — 3% of serviceable market",
+                color: "text-emerald-400",
+                bg: "bg-emerald-500/5 border-emerald-500/20",
+              },
+            ].map(({ label, title, value, desc, color, bg }) => (
+              <div key={label} className={`border rounded-xl p-6 ${bg}`}>
+                <div className={`text-xs font-bold uppercase tracking-widest ${color} mb-1`}>{label}</div>
+                <div className={`text-4xl font-black ${color} mb-2`}>{value}</div>
+                <div className="text-white text-sm font-semibold mb-2">{title}</div>
+                <p className="text-slate-400 text-xs leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          {/* Competitive moat */}
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden">
+            <div className="px-5 py-3 border-b border-slate-700 bg-slate-800/80">
+              <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Competitive Landscape — Why PriorAuth Pulse Wins</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left px-5 py-3 text-slate-400 font-medium text-xs">Approach</th>
+                    <th className="text-center px-4 py-3 text-slate-400 font-medium text-xs">Works in 2025</th>
+                    <th className="text-center px-4 py-3 text-slate-400 font-medium text-xs">Handles MFA</th>
+                    <th className="text-center px-4 py-3 text-slate-400 font-medium text-xs">Cost/check</th>
+                    <th className="text-center px-4 py-3 text-slate-400 font-medium text-xs">Speed (50 portals)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-700/50">
+                  {[
+                    { name: "Manual coordinators", works: false, mfa: true, cost: "$2.80+", speed: "45–90 min", highlight: false },
+                    { name: "Code-based scrapers", works: false, mfa: false, cost: "$0.12", speed: "15 min (if working)", highlight: false },
+                    { name: "CoverMyMeds / Availity EDI", works: true, mfa: true, cost: "$0.30–0.80", speed: "Batch only (hours)", highlight: false },
+                    { name: "PriorAuth Pulse (TinyFish)", works: true, mfa: true, cost: "$0.04", speed: "2m 14s", highlight: true },
+                  ].map(({ name, works, mfa, cost, speed, highlight }) => (
+                    <tr key={name} className={highlight ? "bg-blue-500/5" : ""}>
+                      <td className={`px-5 py-3 font-medium ${highlight ? "text-blue-300" : "text-slate-300"}`}>{name}</td>
+                      <td className="px-4 py-3 text-center">
+                        {works ? <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" /> : <XCircle className="w-4 h-4 text-red-400 mx-auto" />}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {mfa ? <CheckCircle2 className="w-4 h-4 text-emerald-400 mx-auto" /> : <XCircle className="w-4 h-4 text-red-400 mx-auto" />}
+                      </td>
+                      <td className={`px-4 py-3 text-center font-semibold ${highlight ? "text-emerald-400" : "text-slate-400"}`}>{cost}</td>
+                      <td className={`px-4 py-3 text-center font-semibold ${highlight ? "text-blue-400" : "text-slate-400"}`}>{speed}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
