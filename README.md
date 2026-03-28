@@ -201,6 +201,8 @@ Every response carries `X-Process-Time` and `X-Request-ID` headers. Validation e
 | **Compliance** | HIPAA-aligned: PHI handled via API only, no client-side PII exposure | ✅ |
 | **Reliability** | Demo mode floor values — dashboard always meaningful without live keys | ✅ |
 | **Reliability** | Auto-refresh stale demo timestamps — 24h metrics never zero | ✅ |
+| **Testing** | pytest suite — 15 tests covering all major endpoints + Pydantic validation | ✅ |
+| **Code Quality** | FastAPI lifespan pattern (not deprecated on_event), zero Pydantic warnings | ✅ |
 
 ---
 
