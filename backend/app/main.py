@@ -37,6 +37,7 @@ except ImportError:
 from app.core import run_batch_check, PAYERS
 from app.scheduler import start_scheduler, stop_scheduler
 from app.appeal import generate_appeal_letter
+from app.models import CreatePatientRequest, GenerateAppealRequest
 
 
 def _iso_utc(dt: datetime) -> str:
@@ -359,13 +360,21 @@ def get_patients():
     return {"patients": patients, "total": len(patients)}
 
 
-@app.post("/patients")
-def create_patient(patient: dict):
-    """Add a new patient to monitor."""
-    patient["pa_active"] = True
-    patient["created_at"] = datetime.now(timezone.utc)
-    result = db.patients.insert_one(patient)
-    return {"inserted_id": str(result.inserted_id), "message": "Patient added"}
+@app.post("/patients", status_code=201)
+def create_patient(patient: CreatePatientRequest):
+    """Add a new patient to the monitoring roster.
+
+    Validates CPT code, payer names, and date of birth format before inserting.
+    Returns the new patient's MongoDB ID.
+    """
+    doc = patient.model_dump()
+    doc["pa_active"] = True
+    doc["created_at"] = datetime.now(timezone.utc)
+    try:
+        result = db.patients.insert_one(doc)
+    except Exception:
+        raise HTTPException(status_code=409, detail=f"Patient with member_id '{patient.member_id}' already exists")
+    return {"inserted_id": str(result.inserted_id), "member_id": patient.member_id, "message": "Patient added to monitoring"}
 
 
 @app.get("/patients/{member_id}/history")
@@ -619,19 +628,22 @@ def get_tinyfish_integration():
 
 
 @app.post("/patients/{member_id}/appeal")
-async def generate_appeal(member_id: str, body: dict):
+async def generate_appeal(member_id: str, body: GenerateAppealRequest):
     """
-    Generate an AI appeal letter for a denied PA using Claude Opus 4.6.
-    Body: { payer_name, denial_reason, auth_number? }
+    Generate an AI peer-to-peer review appeal letter for a denied PA.
+
+    Uses Claude Opus 4.6 with adaptive thinking to produce a clinically precise
+    letter citing evidence-based guidelines and directly rebutting the denial reason.
+    Falls back to a demo letter template when ANTHROPIC_API_KEY is not set.
     """
     # Look up patient in DB
     patient = db.patients.find_one({"member_id": member_id}, {"_id": 0})
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    payer_name = body.get("payer_name", "")
-    denial_reason = body.get("denial_reason", "Medical necessity not established")
-    auth_number = body.get("auth_number")
+    payer_name = body.payer_name
+    denial_reason = body.denial_reason
+    auth_number = body.auth_number
 
     try:
         letter = await generate_appeal_letter(
