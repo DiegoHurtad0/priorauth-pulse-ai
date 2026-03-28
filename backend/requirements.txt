@@ -8,3 +8,5 @@ httpx
 agentops
 pydantic-settings
 anthropic
+pytest
+pytest-asyncio

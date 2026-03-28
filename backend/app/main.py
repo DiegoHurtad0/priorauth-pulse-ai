@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -53,11 +54,25 @@ MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["priorauth_pulse"]
 
+# ── FastAPI lifespan ─────────────────────────
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI lifespan — replaces deprecated on_event handlers."""
+    ensure_indexes()
+    seed_demo_data()
+    start_scheduler(db)
+    print("🚀 PriorAuth Pulse backend running")
+    yield
+    stop_scheduler()
+    mongo_client.close()
+
+
 # ── FastAPI app ──────────────────────────────
 app = FastAPI(
     title="PriorAuth Pulse",
     description="Automated prior authorization monitoring across 50+ health plan portals",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -216,14 +231,6 @@ def ensure_indexes():
     print("✅ MongoDB indexes ensured")
 
 
-@app.on_event("startup")
-async def startup():
-    ensure_indexes()
-    seed_demo_data()
-    start_scheduler(db)
-    print("🚀 PriorAuth Pulse backend running")
-
-
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     """Return consistent JSON error envelope for unhandled exceptions."""
@@ -240,12 +247,6 @@ async def global_exception_handler(request: Request, exc: Exception):
             "message": str(exc) if os.getenv("DEBUG") else "An unexpected error occurred",
         },
     )
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    stop_scheduler()
-    mongo_client.close()
 
 
 # ────────────────────────────────────────────
