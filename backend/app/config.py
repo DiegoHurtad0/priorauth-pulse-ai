@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     TINYFISH_API_KEY: str = ""
     MONGO_URI: str = ""
     AGENTOPS_API_KEY: str = ""
-    COMPOSIO_API_KEY: str = ""
+    COMPOSIO_WEBHOOK_URL: str = ""
     PORT: int = 8000
 
     class Config:

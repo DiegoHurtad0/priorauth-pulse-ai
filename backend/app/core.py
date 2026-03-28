@@ -21,26 +21,31 @@ from app.notifications import send_status_change_alert
 
 PAYERS: dict[str, dict] = {
     "Aetna": {
+        "name": "Aetna",
         "url": "https://availity.com",
         "vault_id": "cred_aetna",
         "profile": "stealth",
     },
     "UnitedHealthcare": {
+        "name": "UnitedHealthcare",
         "url": "https://uhcprovider.com",
         "vault_id": "cred_uhc",
         "profile": "stealth",
     },
     "Cigna": {
+        "name": "Cigna",
         "url": "https://cignaforhcp.cigna.com",
         "vault_id": "cred_cigna",
         "profile": "stealth",
     },
     "Humana": {
+        "name": "Humana",
         "url": "https://availity.com",
         "vault_id": "cred_humana",
         "profile": "stealth",
     },
     "Anthem BCBS": {
+        "name": "Anthem BCBS",
         "url": "https://availity.com",
         "vault_id": "cred_anthem",
         "profile": "stealth",
