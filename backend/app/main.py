@@ -458,6 +458,17 @@ def get_metrics():
     successful_checks = total_checks - unavailable
     success_rate = round((successful_checks / max(total_checks, 1)) * 100, 1)
 
+    # In demo mode (no TINYFISH_API_KEY), use realistic demo floors so the
+    # dashboard doesn't show zeros when the seed data ages past 24 hours.
+    is_demo = not os.getenv("TINYFISH_API_KEY")
+    if is_demo and total_checks < 5:
+        total_checks   = 22
+        status_changes = 3
+        success_rate   = 98.7
+        approved       = 11
+        denied         = 3
+        pending        = 8
+
     return {
         "active_patients": active_patients,
         "total_checks_24h": total_checks,
@@ -584,7 +595,7 @@ def get_tinyfish_integration():
         },
         "ai_stack": {
             "pa_agent": "TinyFish Web Agent API",
-            "appeal_letters": "Anthropic Claude claude-opus-4-6 via streaming",
+            "appeal_letters": "Anthropic Claude Opus 4.6 via streaming",
         },
     }
 
@@ -592,7 +603,7 @@ def get_tinyfish_integration():
 @app.post("/patients/{member_id}/appeal")
 async def generate_appeal(member_id: str, body: dict):
     """
-    Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6.
+    Generate an AI appeal letter for a denied PA using Claude Opus 4.6.
     Body: { payer_name, denial_reason, auth_number? }
     """
     # Look up patient in DB

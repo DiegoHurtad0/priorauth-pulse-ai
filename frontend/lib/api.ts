@@ -250,7 +250,7 @@ export async function getTinyFishIntegration(): Promise<TinyFishIntegrationRespo
   return get<TinyFishIntegrationResponse>("/tinyfish/integration");
 }
 
-/** Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6. */
+/** Generate an AI appeal letter for a denied PA using Claude Opus 4.6. */
 export async function generateAppealLetter(
   memberId: string,
   payerName: string,
