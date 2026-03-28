@@ -14,6 +14,7 @@ from fastapi import FastAPI, BackgroundTasks, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pymongo import MongoClient, ASCENDING, DESCENDING
+from pymongo.errors import OperationFailure
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -220,14 +221,31 @@ def seed_demo_data():
 
 
 # ── Lifecycle events ─────────────────────────
+def _safe_create_index(collection, keys, **kwargs):
+    """Create an index, silently skipping if an equivalent index already exists.
+
+    MongoDB raises OperationFailure code 85 (IndexOptionsConflict) or 86
+    (IndexKeySpecsConflict) when an index with the same name exists but with
+    different options (e.g. sparse vs non-sparse).  We treat these as no-ops
+    rather than crashing the server on startup.
+    """
+    try:
+        collection.create_index(keys, **kwargs)
+    except OperationFailure as exc:
+        if exc.code in (85, 86):  # IndexOptionsConflict / IndexKeySpecsConflict
+            print(f"⚠️  Index already exists with different options, skipping: {exc.details.get('errmsg', '')[:120]}")
+        else:
+            raise
+
+
 def ensure_indexes():
     """Create MongoDB indexes for query performance. Safe to call on every startup (idempotent)."""
     # patients: member_id is the natural primary key for lookups
-    db.patients.create_index("member_id", unique=True, background=True)
+    _safe_create_index(db.patients, "member_id", unique=True, background=True)
     # pa_checks: the three most common query patterns
-    db.pa_checks.create_index([("member_id", ASCENDING), ("payer_name", ASCENDING)], background=True)
-    db.pa_checks.create_index([("checked_at", ASCENDING)], background=True)  # range queries in /metrics
-    db.pa_checks.create_index([("payer_name", ASCENDING), ("auth_status", ASCENDING)], background=True)  # /analytics/payers
+    _safe_create_index(db.pa_checks, [("member_id", ASCENDING), ("payer_name", ASCENDING)], background=True)
+    _safe_create_index(db.pa_checks, [("checked_at", ASCENDING)], background=True)  # range queries in /metrics
+    _safe_create_index(db.pa_checks, [("payer_name", ASCENDING), ("auth_status", ASCENDING)], background=True)  # /analytics/payers
     print("✅ MongoDB indexes ensured")
 
 
