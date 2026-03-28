@@ -251,7 +251,7 @@ npm run dev    # Connects to http://localhost:8000
 | `MONGO_URI` | MongoDB Atlas connection string | ✅ |
 | `ANTHROPIC_API_KEY` | Claude Opus 4.6 for appeal letters | Optional |
 | `AGENTOPS_API_KEY` | Session replay + monitoring | Optional |
-| `SLACK_WEBHOOK_URL` | Status change notifications | Optional |
+| `COMPOSIO_WEBHOOK_URL` | Slack status change notifications via Composio | Optional |
 
 > **Demo mode:** Without `TINYFISH_API_KEY`, the dashboard loads with 15 pre-seeded patients and 22 demo PA checks. All features are visible and interactive.
 
