@@ -364,7 +364,7 @@ export default function LandingPage() {
             <div>
               <p className="text-violet-300 font-semibold text-sm">TinyFish + Claude = Full PA Automation Stack</p>
               <p className="text-slate-400 text-sm mt-0.5">
-                TinyFish extracts the PA status. Claude claude-opus-4-6 writes the clinical appeal letter for denied cases — citing AAOS guidelines, NEJM studies, and rebutting the denial reason directly.
+                TinyFish extracts the PA status. Claude Opus 4.6 writes the clinical appeal letter for denied cases — citing AAOS guidelines, NEJM studies, and rebutting the denial reason directly.
               </p>
             </div>
           </div>
@@ -580,7 +580,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {[
               { name: "TinyFish", role: "Web Agent", color: "text-blue-400", bg: "bg-blue-500/5 border-blue-500/20" },
-              { name: "Claude claude-opus-4-6", role: "Appeal Letters", color: "text-violet-400", bg: "bg-violet-500/5 border-violet-500/20" },
+              { name: "Claude Opus 4.6", role: "Appeal Letters", color: "text-violet-400", bg: "bg-violet-500/5 border-violet-500/20" },
               { name: "MongoDB", role: "Storage", color: "text-emerald-400", bg: "bg-emerald-500/5 border-emerald-500/20" },
               { name: "AgentOps", role: "Monitoring", color: "text-amber-400", bg: "bg-amber-500/5 border-amber-500/20" },
               { name: "FastAPI", role: "Backend", color: "text-teal-400", bg: "bg-teal-500/5 border-teal-500/20" },
@@ -717,6 +717,90 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── HIPAA & Security ──────────────────────── */}
+      <section className="py-20 px-6 border-t border-slate-800 bg-slate-900/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <Shield className="w-5 h-5 text-emerald-400" />
+            <span className="text-emerald-400 text-sm font-semibold uppercase tracking-wider">
+              HIPAA-Ready Architecture
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            Built for healthcare from day one
+          </h2>
+          <p className="text-slate-400 text-lg mb-10 max-w-2xl">
+            Every design decision accounts for PHI handling, audit trails, and the compliance requirements specialty practices face daily.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {[
+              {
+                title: "No PHI stored in agents",
+                desc: "TinyFish agents receive only member ID and payer — never DOB, diagnosis, or clinical notes. Minimum necessary principle applied at the API layer.",
+                color: "text-emerald-400",
+                bg: "bg-emerald-500/5 border-emerald-500/20",
+              },
+              {
+                title: "AES-256 credential vault",
+                desc: "Payer portal credentials are stored in TinyFish Vault with AES-256 encryption. Never in plaintext, never in environment variables.",
+                color: "text-blue-400",
+                bg: "bg-blue-500/5 border-blue-500/20",
+              },
+              {
+                title: "Audit trail on every check",
+                desc: "Every PA check writes a timestamped record to MongoDB — who checked, what payer, what was returned. Full audit log for compliance review.",
+                color: "text-violet-400",
+                bg: "bg-violet-500/5 border-violet-500/20",
+              },
+              {
+                title: "Read-only agent guardrails",
+                desc: "TinyFish goal prompt enforces 4 hard rules: no new authorizations, no cancellations, no form submissions, no data modifications.",
+                color: "text-amber-400",
+                bg: "bg-amber-500/5 border-amber-500/20",
+              },
+              {
+                title: "US residential proxy only",
+                desc: "All portal traffic routes through US-based residential IPs. No international nodes, compliant with payer access policies.",
+                color: "text-teal-400",
+                bg: "bg-teal-500/5 border-teal-500/20",
+              },
+              {
+                title: "Status changes only — no clinical data",
+                desc: "PriorAuth Pulse extracts auth status, auth number, and denial reason only. No clinical records, diagnoses, or treatment notes are captured or stored.",
+                color: "text-slate-300",
+                bg: "bg-slate-700/30 border-slate-600/30",
+              },
+            ].map(({ title, desc, color, bg }) => (
+              <div key={title} className={`border rounded-xl p-5 ${bg}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 className={`w-4 h-4 ${color} flex-shrink-0`} />
+                  <span className={`font-semibold text-sm ${color}`}>{title}</span>
+                </div>
+                <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 text-sm font-medium">BAA-ready for covered entities</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 text-sm font-medium">SOC 2 Type II roadmap (Q3 2026)</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 text-sm font-medium">Encrypted at rest &amp; in transit</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span className="text-slate-300 text-sm font-medium">CAQH ProView compatible</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Final CTA ─────────────────────────────── */}
       <section className="py-24 px-6 border-t border-slate-800 bg-slate-900/40">
         <div className="max-w-3xl mx-auto text-center">
@@ -774,15 +858,26 @@ export default function LandingPage() {
           <p className="text-slate-600 text-xs">
             Built for TinyFish $2M Pre-Accelerator Hackathon · March 2026 · Diego Hurtado
           </p>
-          <a
-            href="https://tinyfish.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-xs transition-colors"
-          >
-            Powered by TinyFish
-            <ExternalLink className="w-3 h-3" />
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/DiegoHurtad0/priorauth-pulse-ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-xs transition-colors"
+            >
+              GitHub
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <a
+              href="https://tinyfish.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 text-xs transition-colors"
+            >
+              Powered by TinyFish
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
         </div>
       </footer>
     </div>
