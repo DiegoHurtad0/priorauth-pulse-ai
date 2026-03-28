@@ -12,6 +12,7 @@ import AgentOpsCard from "../components/AgentOpsCard";
 import PayerAnalyticsCard from "../components/PayerAnalyticsCard";
 import TinyFishRunsCard from "../components/TinyFishRunsCard";
 import TinyFishIntegrationCard from "../components/TinyFishIntegrationCard";
+import SystemHealthCard from "../components/SystemHealthCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -227,6 +228,9 @@ export default function DashboardPage() {
         <TinyFishRunsCard />
         <TinyFishIntegrationCard />
       </div>
+
+      {/* ── System Health + API Docs ────────────── */}
+      <SystemHealthCard />
 
       {/* ── Payer coverage strip ───────────────── */}
       {metrics?.supported_payers && metrics.supported_payers.length > 0 && (

@@ -125,12 +125,30 @@ def _demo_check(member_id, payer_name, patient_name, status, hours_ago, changed=
 
 
 def seed_demo_data():
-    """Insert demo patients and PA check history if collections are empty."""
+    """Insert demo patients and PA check history if collections are empty.
+    Also refreshes checked_at timestamps on existing demo checks that have
+    aged past 20 hours, so the 24h metrics always look alive in demo mode.
+    """
     if db.patients.count_documents({}) == 0:
         now = datetime.now(timezone.utc)
         patients_with_ts = [{**p, "created_at": now} for p in DEMO_PATIENTS]
         db.patients.insert_many(patients_with_ts)
         print(f"✅ Seeded {len(DEMO_PATIENTS)} demo patients")
+
+    # Refresh stale demo checks so 24h metrics stay populated
+    if not os.getenv("TINYFISH_API_KEY"):
+        stale_cutoff = datetime.now(timezone.utc) - timedelta(hours=20)
+        stale_count = db.pa_checks.count_documents({"checked_at": {"$lt": stale_cutoff}})
+        if stale_count > 0:
+            # Reset all checks to within the last 8 hours
+            now = datetime.now(timezone.utc)
+            for i, check in enumerate(db.pa_checks.find({}, {"_id": 1})):
+                hours_offset = (i % 8) + 1  # 1–8 hours ago
+                db.pa_checks.update_one(
+                    {"_id": check["_id"]},
+                    {"$set": {"checked_at": now - timedelta(hours=hours_offset)}},
+                )
+            print(f"✅ Refreshed {stale_count} demo check timestamps")
 
     if db.pa_checks.count_documents({}) == 0:
         demo_checks = [
