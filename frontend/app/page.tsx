@@ -33,7 +33,7 @@ const HOW_IT_WORKS = [
   {
     step: "01",
     title: "One click",
-    desc: "Hit "Run Check All" — PriorAuth Pulse launches TinyFish agents for every patient × payer combination simultaneously.",
+    desc: "Hit 'Run Check All' — PriorAuth Pulse launches TinyFish agents for every patient × payer combination simultaneously.",
   },
   {
     step: "02",
