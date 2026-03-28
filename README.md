@@ -150,6 +150,7 @@ View the exact goal prompt for any patient × payer: `GET /goal-preview/{member_
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
+| **GET** | **`/health/detailed`** | **MongoDB, scheduler, TinyFish, Claude — all subsystem statuses** |
 | GET | `/patients` | Active patients with latest checks per payer |
 | POST | `/patients` | Add new patient to monitoring |
 | GET | `/patients/{id}/history` | Full PA check history (timeline) |
