@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Activity, TrendingUp, Bell } from "lucide-react";
+import { Users, Activity, TrendingUp, Bell, Clock } from "lucide-react";
 import type { MetricsResponse } from "@/lib/api";
 
 interface MetricsBarProps {
@@ -59,12 +59,15 @@ function KPICard({
 }
 
 /**
- * Four KPI cards displayed at the top of the dashboard.
- * Shows: Active Patients, Checks Today, Success Rate, Status Changes.
+ * Five KPI cards displayed at the top of the dashboard.
+ * Shows: Active Patients, Checks Today, Success Rate, Status Changes, Time Saved.
  */
 export default function MetricsBar({ metrics, loading = false }: MetricsBarProps) {
+  // Each check saves ~25 min of manual coordinator time
+  const timeSavedH = metrics ? Math.round((metrics.total_checks_24h * 25) / 60) : 0;
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
       <KPICard
         label="Active Patients"
         value={metrics?.active_patients ?? 0}
@@ -96,6 +99,14 @@ export default function MetricsBar({ metrics, loading = false }: MetricsBarProps
         icon={Bell}
         accentColor="bg-orange-500/10 text-orange-400"
         pulse
+        loading={loading}
+      />
+      <KPICard
+        label="Time Saved"
+        value={`${timeSavedH}h`}
+        subtext="vs manual checks today"
+        icon={Clock}
+        accentColor="bg-teal-500/10 text-teal-400"
         loading={loading}
       />
     </div>

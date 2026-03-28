@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Eye, ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import type { Patient, PACheck } from "@/lib/api";
 
@@ -60,14 +60,33 @@ function flattenToRows(
  * Denied rows have a subtle red tint; status-changed rows float to top.
  * Clicking the eye icon or row opens PatientModal.
  */
+const STATUS_FILTERS = ["All", "Approved", "Pending", "Denied", "In Review", "Info Needed"] as const;
+
 export default function PatientTable({
   patients,
   loading = false,
   onPatientClick,
 }: PatientTableProps) {
   const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
-  const rows = flattenToRows(patients);
+  const allRows = useMemo(() => flattenToRows(patients), [patients]);
+
+  const rows = useMemo(() => {
+    return allRows.filter(({ patient, check }) => {
+      const q = search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        patient.name.toLowerCase().includes(q) ||
+        patient.member_id.toLowerCase().includes(q) ||
+        check?.payer_name.toLowerCase().includes(q);
+      const matchesStatus =
+        statusFilter === "All" || check?.auth_status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [allRows, search, statusFilter]);
+
   const totalPages = Math.ceil(rows.length / PAGE_SIZE);
   const pageRows = rows.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
@@ -100,6 +119,38 @@ export default function PatientTable({
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
+      {/* Search + Filter bar */}
+      <div className="flex flex-col sm:flex-row gap-2 p-3 border-b border-slate-700">
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(0); }}
+            placeholder="Search by patient, member ID, or payer..."
+            className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors"
+          />
+        </div>
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <Filter className="w-3.5 h-3.5 text-slate-500" />
+          <div className="flex gap-1">
+            {STATUS_FILTERS.map((s) => (
+              <button
+                key={s}
+                onClick={() => { setStatusFilter(s); setPage(0); }}
+                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                  statusFilter === s
+                    ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px]">

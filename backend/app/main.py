@@ -348,6 +348,36 @@ def get_metrics():
     }
 
 
+@app.get("/analytics/payers")
+def get_payer_analytics():
+    """
+    Return approval rates, denial rates, and check counts per payer.
+    Used by the Payer Analytics card on the dashboard.
+    """
+    results = []
+    for payer_name in PAYERS:
+        total = db.pa_checks.count_documents({"payer_name": payer_name})
+        approved = db.pa_checks.count_documents({"payer_name": payer_name, "auth_status": "Approved"})
+        denied = db.pa_checks.count_documents({"payer_name": payer_name, "auth_status": "Denied"})
+        pending = db.pa_checks.count_documents({"payer_name": payer_name, "auth_status": {"$in": ["Pending", "In Review"]}})
+        approval_rate = round((approved / max(total, 1)) * 100, 1)
+        denial_rate = round((denied / max(total, 1)) * 100, 1)
+        # Avg days to decision (approved/denied checks with decision_date)
+        results.append({
+            "payer": payer_name,
+            "total_checks": total,
+            "approved": approved,
+            "denied": denied,
+            "pending": pending,
+            "approval_rate": approval_rate,
+            "denial_rate": denial_rate,
+        })
+
+    # Sort by approval rate desc
+    results.sort(key=lambda x: x["approval_rate"], reverse=True)
+    return {"payers": results}
+
+
 @app.post("/patients/{member_id}/appeal")
 async def generate_appeal(member_id: str, body: dict):
     """

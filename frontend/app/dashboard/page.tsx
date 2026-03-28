@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { RefreshCw, Clock, Download } from "lucide-react";
+import { RefreshCw, Clock, Download, UserPlus } from "lucide-react";
 import MetricsBar from "../components/MetricsBar";
 import PatientTable from "../components/PatientTable";
 import PatientModal from "../components/PatientModal";
+import AddPatientModal from "../components/AddPatientModal";
 import RunCheckButton from "../components/RunCheckButton";
 import AlertToast from "../components/AlertToast";
 import AgentOpsCard from "../components/AgentOpsCard";
+import PayerAnalyticsCard from "../components/PayerAnalyticsCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -40,6 +42,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [showAddPatient, setShowAddPatient] = useState(false);
   const [alerts, setAlerts] = useState<AlertToastData[]>([]);
 
   // Track previously seen statuses to detect changes during polling
@@ -176,7 +179,16 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <RunCheckButton onComplete={handleRunComplete} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAddPatient(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm font-medium transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add Patient
+          </button>
+          <RunCheckButton onComplete={handleRunComplete} />
+        </div>
       </div>
 
       {/* ── Section 3: Patient table ───────────── */}
@@ -202,8 +214,11 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* ── AgentOps monitoring card ───────────── */}
-      <AgentOpsCard />
+      {/* ── Analytics row ──────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PayerAnalyticsCard />
+        <AgentOpsCard />
+      </div>
 
       {/* ── Payer coverage strip ───────────────── */}
       {metrics?.supported_payers && metrics.supported_payers.length > 0 && (
@@ -252,6 +267,14 @@ export default function DashboardPage() {
         patient={selectedPatient}
         onClose={() => setSelectedPatient(null)}
       />
+
+      {/* ── Add patient modal ──────────────────── */}
+      {showAddPatient && (
+        <AddPatientModal
+          onClose={() => setShowAddPatient(false)}
+          onAdded={() => refresh(false)}
+        />
+      )}
 
       {/* ── Alert toasts ───────────────────────── */}
       {alerts.length > 0 && (
