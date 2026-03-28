@@ -71,7 +71,13 @@ export default function AddPatientModal({ onClose, onAdded }: AddPatientModalPro
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail || `HTTP ${res.status}`);
+        // FastAPI Pydantic v2 validation errors return detail as an array
+        const detail = body.detail;
+        if (Array.isArray(detail) && detail.length > 0) {
+          const first = detail[0];
+          throw new Error(first.msg?.replace(/^Value error, /, "") || `HTTP ${res.status}`);
+        }
+        throw new Error(typeof detail === "string" ? detail : `HTTP ${res.status}`);
       }
       onAdded();
       onClose();
