@@ -147,22 +147,24 @@ View the exact goal prompt for any patient × payer: `GET /goal-preview/{member_
 
 ## API Endpoints
 
+Every response carries `X-Process-Time` and `X-Request-ID` headers. Validation errors return RFC-compliant 422 JSON. All endpoints documented at `/docs` (Swagger UI).
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Health check |
-| **GET** | **`/health/detailed`** | **MongoDB, scheduler, TinyFish, Claude — all subsystem statuses** |
+| **GET** | **`/health/detailed`** | **All subsystem statuses (MongoDB, scheduler, TinyFish, Claude)** |
 | GET | `/patients` | Active patients with latest checks per payer |
-| POST | `/patients` | Add new patient to monitoring |
+| POST | `/patients` | Add patient (Pydantic-validated: CPT code, payer names, DOB) |
 | GET | `/patients/{id}/history` | Full PA check history (timeline) |
-| POST | `/run-check` | Trigger batch check (returns task_id) |
-| GET | `/run-check/{task_id}/status` | Poll batch progress + streaming_url |
+| POST | `/run-check` | Trigger batch check — returns `task_id` |
+| GET | `/run-check/{task_id}/status` | Poll batch progress + `streaming_url` |
 | GET | `/pa-checks/recent?limit=N` | Latest checks (status changes first) |
-| GET | `/metrics` | 24h KPIs |
+| GET | `/metrics` | 24h KPIs (success rate, approved, denied, pending) |
 | GET | `/analytics/payers` | Per-payer approval/denial rates |
-| GET | `/agentops/metrics` | Agent monitoring stats |
-| **GET** | **`/goal-preview/{member_id}/{payer}`** | **Exact TinyFish goal prompt** |
-| **GET** | **`/tinyfish/integration`** | **Complete TinyFish API feature summary** |
-| POST | `/patients/{id}/appeal` | Generate AI appeal letter (Claude Opus 4.6) |
+| GET | `/agentops/metrics` | Agent observability stats |
+| **GET** | **`/goal-preview/{member_id}/{payer}`** | **Exact TinyFish Level 3 goal prompt** |
+| **GET** | **`/tinyfish/integration`** | **Complete TinyFish API feature matrix** |
+| POST | `/patients/{id}/appeal` | AI appeal letter (Claude Opus 4.6 · adaptive thinking) |
 
 ---
 
@@ -171,13 +173,34 @@ View the exact goal prompt for any patient × payer: `GET /goal-preview/{member_
 | Layer | Technology | Role |
 |-------|-----------|------|
 | **Web Automation** | TinyFish Web Agent API | Core PA portal navigation |
-| **AI Appeal Letters** | Anthropic Claude Opus 4.6 | Clinical appeal generation |
-| **Database** | MongoDB Atlas | JSON-native PA check storage |
-| **Backend** | FastAPI + Python 3.11 | Async TinyFish orchestration |
+| **AI Appeal Letters** | Anthropic Claude Opus 4.6 + adaptive thinking | Clinical appeal generation |
+| **Database** | MongoDB Atlas (4 compound indexes) | JSON-native PA check storage |
+| **Backend** | FastAPI + Python 3.11 + Pydantic v2 | Async TinyFish orchestration |
+| **Middleware** | Request timing + UUID + global error handler | Production observability |
 | **Frontend** | Next.js 14 + TypeScript + Tailwind | Real-time dashboard |
 | **Agent Monitoring** | AgentOps | Run metrics, session replay |
 | **Alerts** | Slack webhook | Real-time status change notifications |
 | **Scheduler** | APScheduler (every 4h) | Automated batch checks |
+
+---
+
+## Production Readiness Checklist
+
+| Category | Signal | Status |
+|----------|--------|--------|
+| **API** | Pydantic v2 request validation (CPT codes, payer names, DOB) | ✅ |
+| **API** | FastAPI Swagger UI auto-generated from type hints (`/docs`) | ✅ |
+| **API** | X-Process-Time + X-Request-ID on every response | ✅ |
+| **API** | Global exception handler — consistent JSON error envelope | ✅ |
+| **Database** | 4 compound MongoDB indexes (member_id unique, checked_at range, payer+status) | ✅ |
+| **Observability** | `/health/detailed` — all subsystem statuses in one call | ✅ |
+| **Observability** | SystemHealthCard renders live subsystem grid in dashboard | ✅ |
+| **Observability** | AgentOps session replay for every TinyFish run | ✅ |
+| **Scheduling** | APScheduler every 4h with `misfire_grace_time=300` | ✅ |
+| **Security** | TinyFish Vault for AES-256 credential storage (no plaintext creds) | ✅ |
+| **Compliance** | HIPAA-aligned: PHI handled via API only, no client-side PII exposure | ✅ |
+| **Reliability** | Demo mode floor values — dashboard always meaningful without live keys | ✅ |
+| **Reliability** | Auto-refresh stale demo timestamps — 24h metrics never zero | ✅ |
 
 ---
 
