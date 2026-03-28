@@ -63,6 +63,7 @@ export interface MetricsResponse {
   denied_24h: number;
   pending_24h: number;
   supported_payers: string[];
+  avg_check_duration_seconds: number;
 }
 
 export interface ChecksResponse {

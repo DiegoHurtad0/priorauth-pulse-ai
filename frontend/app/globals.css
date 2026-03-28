@@ -45,3 +45,17 @@ body {
 .ping-slow {
   animation: ping-slow 2s ease-in-out infinite;
 }
+
+/* Modal / toast entrance animations (fallback if Tailwind purges them) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in  { animation: fadeIn  0.2s ease-out; }
+.animate-slide-up { animation: slideUp 0.3s ease-out; }
