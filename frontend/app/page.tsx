@@ -811,6 +811,184 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Unit Economics + GTM ──────────────────── */}
+      <section className="py-20 px-6 border-t border-slate-800">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <TrendingUp className="w-5 h-5 text-emerald-400" />
+            <span className="text-emerald-400 text-sm font-semibold uppercase tracking-wider">
+              Unit Economics
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">
+            SaaS metrics that make investors lean in.
+          </h2>
+          <p className="text-slate-400 text-lg mb-10 max-w-2xl">
+            Low CAC, high retention (pain is monthly), and a payback period measured in weeks — not years.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+            {[
+              { metric: "$180", label: "CAC", sub: "outbound + EHR referral" },
+              { metric: "$2,676", label: "LTV", sub: "18-month avg contract" },
+              { metric: "14.9×", label: "LTV:CAC", sub: "industry benchmark: 3×" },
+              { metric: "7 wk", label: "Payback", sub: "from first check run" },
+            ].map(({ metric, label, sub }) => (
+              <div key={label} className="bg-slate-800/50 border border-slate-700 rounded-xl p-5 text-center">
+                <p className="text-3xl font-bold text-white mb-1">{metric}</p>
+                <p className="text-emerald-400 font-semibold text-sm">{label}</p>
+                <p className="text-slate-500 text-xs mt-1">{sub}</p>
+              </div>
+            ))}
+          </div>
+          {/* Revenue projections */}
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden mb-10">
+            <div className="px-5 py-3 border-b border-slate-700">
+              <p className="text-slate-300 text-sm font-semibold">Revenue Projections — Conservative Case</p>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-700/50">
+                    <th className="text-left px-5 py-3 text-slate-400 font-medium">Milestone</th>
+                    <th className="text-right px-5 py-3 text-slate-400 font-medium">Clinics</th>
+                    <th className="text-right px-5 py-3 text-slate-400 font-medium">MRR</th>
+                    <th className="text-right px-5 py-3 text-slate-400 font-medium">ARR</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { period: "Month 3 (beta)", clinics: "10", mrr: "$990", arr: "$11.9K" },
+                    { period: "Month 6 (launch)", clinics: "50", mrr: "$7,450", arr: "$89.4K" },
+                    { period: "Month 12 (Y1)", clinics: "400", mrr: "$59,600", arr: "$715K" },
+                    { period: "Month 24 (Y2)", clinics: "1,800", mrr: "$292K", arr: "$3.5M", highlight: true },
+                  ].map(({ period, clinics, mrr, arr, highlight }) => (
+                    <tr key={period} className={`border-b border-slate-700/30 ${highlight ? "bg-emerald-500/5" : ""}`}>
+                      <td className={`px-5 py-3 font-medium ${highlight ? "text-emerald-400" : "text-slate-300"}`}>{period}</td>
+                      <td className="px-5 py-3 text-right text-slate-300">{clinics}</td>
+                      <td className="px-5 py-3 text-right text-slate-300">{mrr}</td>
+                      <td className={`px-5 py-3 text-right font-semibold ${highlight ? "text-emerald-400" : "text-slate-200"}`}>{arr}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* GTM channels */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              {
+                channel: "Direct outbound",
+                desc: "Target orthopedics, cardiology, and oncology practices — highest PA volume specialties. LinkedIn + cold email to office managers.",
+                color: "text-blue-400",
+                bg: "bg-blue-500/5 border-blue-500/15",
+              },
+              {
+                channel: "EHR marketplace",
+                desc: "Epic App Orchard + Athena Marketplace listings. 350K+ providers on these platforms. Zero marginal CAC per referral.",
+                color: "text-violet-400",
+                bg: "bg-violet-500/5 border-violet-500/15",
+              },
+              {
+                channel: "Billing companies",
+                desc: "White-label API tier for RCM (Revenue Cycle Management) companies already serving 10K+ clinics. One deal = 500 new accounts.",
+                color: "text-amber-400",
+                bg: "bg-amber-500/5 border-amber-500/15",
+              },
+            ].map(({ channel, desc, color, bg }) => (
+              <div key={channel} className={`border rounded-xl p-5 ${bg}`}>
+                <p className={`font-semibold ${color} mb-2`}>{channel}</p>
+                <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Product Roadmap ────────────────────────── */}
+      <section className="py-20 px-6 border-t border-slate-800 bg-slate-900/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-4">
+            <Sparkles className="w-5 h-5 text-amber-400" />
+            <span className="text-amber-400 text-sm font-semibold uppercase tracking-wider">
+              Roadmap
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-10">
+            Today is v1. Here&apos;s where we go next.
+          </h2>
+          <div className="space-y-4">
+            {[
+              {
+                quarter: "Now — MVP",
+                status: "live",
+                items: [
+                  "5 payer portals via TinyFish Level 3 agents",
+                  "Real-time SSE streaming with live browser replay",
+                  "Claude Opus 4.6 appeal letter generation",
+                  "Slack status-change alerts",
+                ],
+              },
+              {
+                quarter: "Q2 2026",
+                status: "next",
+                items: [
+                  "20 additional payer portals (Medicare Advantage, Medicaid)",
+                  "Epic + Athena webhook integration — PA checks triggered automatically",
+                  "Bulk upload via CSV for billing companies",
+                ],
+              },
+              {
+                quarter: "Q3 2026",
+                status: "planned",
+                items: [
+                  "Predictive denial prevention — flag high-risk PAs before submission",
+                  "FHIR R4 compliant data export for downstream EMR sync",
+                  "Multi-site enterprise dashboard with role-based access",
+                ],
+              },
+              {
+                quarter: "Q4 2026",
+                status: "planned",
+                items: [
+                  "White-label API for RCM companies",
+                  "50+ payer portals — full commercial insurance coverage",
+                  "AgentOps-powered audit trail for compliance reporting",
+                ],
+              },
+            ].map(({ quarter, status, items }) => (
+              <div key={quarter} className="flex gap-4">
+                <div className="flex flex-col items-center">
+                  <div className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
+                    status === "live" ? "bg-emerald-400" : status === "next" ? "bg-blue-400" : "bg-slate-600"
+                  }`} />
+                  <div className="w-px flex-1 bg-slate-700/50 mt-1" />
+                </div>
+                <div className="pb-6">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-white font-semibold">{quarter}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      status === "live" ? "bg-emerald-500/15 text-emerald-400" :
+                      status === "next" ? "bg-blue-500/15 text-blue-400" :
+                      "bg-slate-700 text-slate-400"
+                    }`}>
+                      {status === "live" ? "✓ shipped" : status === "next" ? "building" : "planned"}
+                    </span>
+                  </div>
+                  <ul className="space-y-1">
+                    {items.map((item) => (
+                      <li key={item} className="text-slate-400 text-sm flex items-start gap-2">
+                        <span className="text-slate-600 mt-0.5">·</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── HIPAA & Security ──────────────────────── */}
       <section className="py-20 px-6 border-t border-slate-800 bg-slate-900/30">
         <div className="max-w-5xl mx-auto">
