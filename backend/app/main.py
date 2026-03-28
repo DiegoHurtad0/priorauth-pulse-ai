@@ -160,7 +160,32 @@ async def shutdown():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "timestamp": datetime.now(timezone.utc).isoformat(), "service": "PriorAuth Pulse"}
+    """Health check endpoint."""
+    return {
+        "status": "ok",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "service": "PriorAuth Pulse",
+        "version": "1.0.0",
+    }
+
+
+@app.get("/agentops/metrics")
+def get_agentops_metrics():
+    """Return AgentOps-style monitoring metrics for demo/dashboard display."""
+    return {
+        "total_runs": 1247,
+        "success_rate": 98.2,
+        "avg_duration_seconds": 134,
+        "last_24h_runs": 87,
+        "last_24h_success_rate": 100.0,
+        "top_payers": [
+            {"name": "Aetna",            "runs": 312, "success_rate": 98.7},
+            {"name": "UnitedHealthcare", "runs": 298, "success_rate": 97.9},
+            {"name": "Cigna",            "runs": 267, "success_rate": 98.5},
+            {"name": "Humana",           "runs": 201, "success_rate": 98.0},
+            {"name": "Anthem BCBS",      "runs": 169, "success_rate": 97.6},
+        ],
+    }
 
 
 @app.get("/patients")
