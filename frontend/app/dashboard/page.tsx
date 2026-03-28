@@ -11,6 +11,7 @@ import AlertToast from "../components/AlertToast";
 import AgentOpsCard from "../components/AgentOpsCard";
 import PayerAnalyticsCard from "../components/PayerAnalyticsCard";
 import TinyFishRunsCard from "../components/TinyFishRunsCard";
+import TinyFishIntegrationCard from "../components/TinyFishIntegrationCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -221,8 +222,11 @@ export default function DashboardPage() {
         <AgentOpsCard />
       </div>
 
-      {/* ── TinyFish Live Runs ──────────────────── */}
-      <TinyFishRunsCard />
+      {/* ── TinyFish Live Runs + Integration ───── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <TinyFishRunsCard />
+        <TinyFishIntegrationCard />
+      </div>
 
       {/* ── Payer coverage strip ───────────────── */}
       {metrics?.supported_payers && metrics.supported_payers.length > 0 && (

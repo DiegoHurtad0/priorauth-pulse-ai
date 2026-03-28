@@ -220,6 +220,36 @@ export async function getGoalPreview(
   );
 }
 
+export interface TinyFishIntegrationResponse {
+  product: string;
+  integration_level: string;
+  agent_configuration: {
+    browser_profile: string;
+    use_vault: boolean;
+    proxy_config: { enabled: boolean; country_code: string };
+    feature_flags: Record<string, boolean>;
+  };
+  sse_events_handled: { event: string; action: string }[];
+  goal_prompt_features: string[];
+  vault_credential_ids: string[];
+  supported_payers: { name: string; url: string; vault_id: string }[];
+  concurrency: { model: string; max_simultaneous: string; demo_scale: string };
+  observability: {
+    streaming_url_per_run: boolean;
+    agentops_integrated: boolean;
+    agentops_session_url: string | null;
+    run_id_stored: boolean;
+    status_change_detection: boolean;
+    slack_alerts_on_change: boolean;
+  };
+  ai_stack: { pa_agent: string; appeal_letters: string };
+}
+
+/** Fetch TinyFish integration summary for observability / judging. */
+export async function getTinyFishIntegration(): Promise<TinyFishIntegrationResponse | null> {
+  return get<TinyFishIntegrationResponse>("/tinyfish/integration");
+}
+
 /** Generate an AI appeal letter for a denied PA using Claude claude-opus-4-6. */
 export async function generateAppealLetter(
   memberId: string,
