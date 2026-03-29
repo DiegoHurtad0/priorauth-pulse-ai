@@ -6,6 +6,11 @@
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
+// Extra headers needed when backend is behind ngrok tunnel
+const EXTRA_HEADERS: Record<string, string> = BASE_URL.includes("ngrok")
+  ? { "ngrok-skip-browser-warning": "true" }
+  : {};
+
 // ─────────────────────────────────────────────
 // Domain types
 // ─────────────────────────────────────────────
@@ -112,7 +117,10 @@ export interface AgentOpsMetrics {
 
 async function get<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${BASE_URL}${path}`, { cache: "no-store" });
+    const res = await fetch(`${BASE_URL}${path}`, {
+      cache: "no-store",
+      headers: { ...EXTRA_HEADERS },
+    });
     if (!res.ok) {
       console.error(`GET ${path} → ${res.status} ${res.statusText}`);
       return null;
@@ -128,7 +136,7 @@ async function post<T>(path: string, body?: unknown): Promise<T | null> {
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...EXTRA_HEADERS },
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {
