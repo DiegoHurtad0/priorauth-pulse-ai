@@ -13,6 +13,7 @@ import PayerAnalyticsCard from "../components/PayerAnalyticsCard";
 import TinyFishRunsCard from "../components/TinyFishRunsCard";
 import TinyFishIntegrationCard from "../components/TinyFishIntegrationCard";
 import SystemHealthCard from "../components/SystemHealthCard";
+import LiveRunsCard from "../components/LiveRunsCard";
 import { getPatients, getMetrics } from "@/lib/api";
 import type {
   Patient,
@@ -225,6 +226,7 @@ export default function DashboardPage() {
 
       {/* ── TinyFish Live Runs + Integration ───── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <LiveRunsCard />
         <TinyFishRunsCard />
         <TinyFishIntegrationCard />
       </div>

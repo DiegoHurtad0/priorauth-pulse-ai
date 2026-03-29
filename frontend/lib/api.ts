@@ -250,6 +250,29 @@ export async function getTinyFishIntegration(): Promise<TinyFishIntegrationRespo
   return get<TinyFishIntegrationResponse>("/tinyfish/integration");
 }
 
+export interface LiveRun {
+  patient_name: string;
+  member_id: string;
+  payer_name: string;
+  auth_status: string;
+  run_id: string;
+  streaming_url: string | null;
+  steps_executed: number | null;
+  task_type: string | null;
+  checked_at: string;
+}
+
+export interface LiveRunsResponse {
+  runs: LiveRun[];
+  total_real_runs: number;
+  message: string;
+}
+
+/** Fetch real TinyFish agent runs with UUID run_ids and streaming URLs. */
+export async function getLiveRuns(limit = 20): Promise<LiveRunsResponse | null> {
+  return get<LiveRunsResponse>(`/pa-checks/live-runs?limit=${limit}`);
+}
+
 /** Generate an AI appeal letter for a denied PA using Claude Opus 4.6. */
 export async function generateAppealLetter(
   memberId: string,

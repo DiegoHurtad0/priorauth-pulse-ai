@@ -215,10 +215,6 @@ def seed_demo_data():
         db.pa_checks.insert_many(demo_checks)
         print(f"✅ Seeded {len(demo_checks)} demo PA checks")
 
-    # Create indexes for performance
-    db.pa_checks.create_index([("member_id", 1), ("payer_name", 1), ("checked_at", DESCENDING)])
-    db.patients.create_index("member_id", unique=True, sparse=True)
-
 
 # ── Lifecycle events ─────────────────────────
 def _safe_create_index(collection, keys, **kwargs):
@@ -516,6 +512,46 @@ def get_recent_checks(limit: int = 50):
         if isinstance(c.get("checked_at"), datetime):
             c["checked_at"] = _iso_utc(c["checked_at"])
     return {"checks": checks, "total": len(checks)}
+
+
+@app.get("/pa-checks/live-runs")
+def get_live_runs(limit: int = 50):
+    """
+    Return real TinyFish agent runs — UUIDs, streaming URLs, step counts.
+    These are actual executions from the burn script (public-site research tasks).
+    Filtered to docs with real UUID run_ids (not demo seeded data).
+    """
+    import re
+    uuid_pattern = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+    # Fetch recent burn_run docs
+    raw = list(
+        db.pa_checks.find(
+            {"run_id": {"$regex": "^[0-9a-f]{8}-"}},
+            {
+                "_id": 0,
+                "patient_name": 1,
+                "member_id": 1,
+                "payer_name": 1,
+                "auth_status": 1,
+                "run_id": 1,
+                "streaming_url": 1,
+                "steps_executed": 1,
+                "task_type": 1,
+                "checked_at": 1,
+            },
+            sort=[("checked_at", DESCENDING)],
+            limit=limit,
+        )
+    )
+    for doc in raw:
+        if isinstance(doc.get("checked_at"), datetime):
+            doc["checked_at"] = _iso_utc(doc["checked_at"])
+    total_real = db.pa_checks.count_documents({"run_id": {"$regex": "^[0-9a-f]{8}-"}})
+    return {
+        "runs": raw,
+        "total_real_runs": total_real,
+        "message": f"{total_real} real TinyFish agent executions recorded",
+    }
 
 
 @app.get("/metrics")
