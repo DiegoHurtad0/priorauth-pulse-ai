@@ -331,6 +331,30 @@ export default function PatientModal({ patient, onClose }: PatientModalProps) {
                         </span>
                       </p>
                     )}
+
+                    {/* TinyFish real run proof */}
+                    {check.run_id && (
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        <span className="text-slate-600 text-xs font-mono">
+                          {check.run_id.slice(0, 8)}…{check.run_id.slice(-4)}
+                        </span>
+                        {check.streaming_url && (
+                          <a
+                            href={check.streaming_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 text-xs font-medium transition-colors"
+                          >
+                            <span className="relative flex h-1.5 w-1.5">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-400" />
+                            </span>
+                            Watch Replay
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
