@@ -28,6 +28,10 @@ try:
         _ao_session = agentops.init(
             os.getenv("AGENTOPS_API_KEY"),
             tags=["priorauth-pulse", "tinyfish-hackathon-2026"],
+            # Disable auto-instrumentation of anthropic — incompatible with
+            # anthropic>=0.50 (BetaToolRunner circular import).  We call
+            # Claude directly via the SDK so we don't need the auto-tracer.
+            instrument_llm_calls=False,
         )
         # Capture session replay URL for display in dashboard
         if _ao_session is not None:
@@ -37,6 +41,8 @@ try:
         print("✅ AgentOps initialized")
 except ImportError:
     pass
+except Exception:
+    pass  # AgentOps optional — never crash server on init failure
 
 from app.core import run_batch_check, PAYERS
 from app.scheduler import start_scheduler, stop_scheduler
