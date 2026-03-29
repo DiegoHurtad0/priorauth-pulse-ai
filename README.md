@@ -4,10 +4,13 @@
 
 **AI-powered prior authorization monitoring across 50+ payer portals — $0.04/check, all-in.**
 
+### 🚀 [Live Demo → frontend-xi-two-45.vercel.app](https://frontend-xi-two-45.vercel.app)
+
 [![Built with TinyFish](https://img.shields.io/badge/Built%20with-TinyFish-blue)](https://tinyfish.ai)
 [![Claude Opus 4.6](https://img.shields.io/badge/Claude-Opus%204.6-violet)](https://anthropic.com)
 [![AgentOps](https://img.shields.io/badge/Monitored%20by-AgentOps-green)](https://agentops.ai)
 [![TinyFish Hackathon](https://img.shields.io/badge/TinyFish-Accelerator%202026-orange)](https://accelerator.tinyfish.ai)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black)](https://frontend-xi-two-45.vercel.app)
 
 ---
 
