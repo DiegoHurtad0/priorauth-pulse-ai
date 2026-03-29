@@ -33,8 +33,8 @@ from tinyfish.agent.types import (
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
-NUM_BATCHES = 20
-DELAY_BETWEEN_BATCHES_SEC = 2
+NUM_BATCHES = 999        # run until credits exhausted (Ctrl+C to stop)
+DELAY_BETWEEN_BATCHES_SEC = 1
 DATA_DIR = Path(__file__).parent.parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
@@ -425,50 +425,54 @@ async def main():
     total_runs = NUM_BATCHES * runs_per_batch
 
     print("=" * 68)
-    print("  PriorAuth Pulse — PUBLIC SITE Research Burn (Max Steps)")
+    print("  PriorAuth Pulse — INFINITE BURN (Ctrl+C to stop)")
     print("=" * 68)
     print(f"  API key    : {api_key[:24]}…")
     print(f"  Patients   : {len(patients)}")
-    print(f"  Tasks      : {len(PUBLIC_TASKS)}  (CMS, NPI, FDA, Regulations, Pricing)")
-    print(f"  Batches    : {NUM_BATCHES}")
-    print(f"  Total runs : {total_runs}  ({runs_per_batch}/batch)")
+    print(f"  Tasks/patient : {len(PUBLIC_TASKS)}  (CMS, NPI, FDA, Regulations, Pricing)")
+    print(f"  Agents/batch  : {runs_per_batch}  (all parallel)")
     print(f"  Steps/run  : ~150–300  (public sites, no login wall)")
-    print(f"  Est. steps : ~{total_runs * 150:,}–{total_runs * 300:,}")
     print("=" * 68)
 
-    for batch_num in range(1, NUM_BATCHES + 1):
-        print(f"\n{'─' * 68}")
-        print(f"  BATCH {batch_num}/{NUM_BATCHES}  —  {datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}")
-        print(f"  Launching {runs_per_batch} agents in parallel…")
-        print(f"{'─' * 68}")
+    batch_num = 0
+    total_steps_estimate = 0
+    try:
+        while True:
+            batch_num += 1
+            print(f"\n{'─' * 68}")
+            print(f"  BATCH {batch_num}  —  {datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}")
+            print(f"  Launching {runs_per_batch} agents in parallel…")
+            print(f"{'─' * 68}")
 
-        t0 = time.time()
-        tasks = [
-            run_research_task(patient, task)
-            for patient in patients
-            for task in PUBLIC_TASKS
-        ]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        elapsed = time.time() - t0
+            t0 = time.time()
+            tasks = [
+                run_research_task(patient, task)
+                for patient in patients
+                for task in PUBLIC_TASKS
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            elapsed = time.time() - t0
 
-        success = sum(1 for r in results if isinstance(r, dict))
-        print(f"\n  Batch {batch_num} done in {elapsed:.0f}s — {success}/{len(results)} with data")
+            success = sum(1 for r in results if isinstance(r, dict))
+            total_steps_estimate += runs_per_batch * 175  # ~175 steps avg
+            print(f"\n  Batch {batch_num} done in {elapsed:.0f}s — {success}/{len(results)} with data")
+            print(f"  Est. total steps consumed this session: ~{total_steps_estimate:,}")
 
-        save_parquet(label=f"batch{batch_num}")
+            save_parquet(label=f"batch{batch_num}")
 
-        real = db.pa_checks.count_documents({"run_id": {"$regex": "^[0-9a-f]{8}-"}})
-        total = db.pa_checks.count_documents({})
-        print(f"  MongoDB: {total} total docs  |  {real} real TinyFish UUIDs")
+            real = db.pa_checks.count_documents({"run_id": {"$regex": "^[0-9a-f]{8}-"}})
+            total_docs = db.pa_checks.count_documents({})
+            print(f"  MongoDB: {total_docs} total docs  |  {real} real TinyFish UUIDs")
 
-        if batch_num < NUM_BATCHES:
             await asyncio.sleep(DELAY_BETWEEN_BATCHES_SEC)
 
-    print(f"\n{'=' * 68}")
-    print("  DONE")
-    print(f"  Total runs   : {total_runs}")
-    print(f"  MongoDB docs : {db.pa_checks.count_documents({})}")
-    print(f"  Parquet      : {DATA_DIR}/")
-    print("=" * 68)
+    except KeyboardInterrupt:
+        print(f"\n{'=' * 68}")
+        print(f"  STOPPED after {batch_num} batches")
+        print(f"  Total runs   : {batch_num * runs_per_batch}")
+        print(f"  MongoDB docs : {db.pa_checks.count_documents({})}")
+        print(f"  Parquet      : {DATA_DIR}/")
+        print("=" * 68)
 
 
 if __name__ == "__main__":
