@@ -10,6 +10,8 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from tinyfish import TinyFish
+from tinyfish.agent.types import BrowserProfile, ProxyConfig, ProxyCountryCode
+from tinyfish.agent.types import StartedEvent, StreamingUrlEvent, ProgressEvent, CompleteEvent
 from pymongo.database import Database
 
 from app.models import PACheck, Patient
@@ -175,33 +177,26 @@ async def check_pa_status(
         with tf_client.agent.stream(
             url=payer["url"],
             goal=goal,
-            browser_profile=payer["profile"],
-            use_vault=True,
-            credential_item_ids=[payer["vault_id"]],
-            proxy_config={"enabled": True, "country_code": "US"},
-            feature_flags={"enable_agent_memory": True},
+            browser_profile=BrowserProfile.STEALTH,
+            proxy_config=ProxyConfig(enabled=True, country_code=ProxyCountryCode.US),
         ) as stream:
             for event in stream:
-                event_type = event.get("type") if isinstance(event, dict) else getattr(event, "type", None)
-
-                if event_type == "STARTED":
-                    run_id = event.get("run_id") if isinstance(event, dict) else getattr(event, "run_id", None)
+                if isinstance(event, StartedEvent):
+                    run_id = event.run_id
                     print(f"  🚀 Started — run_id: {run_id}")
 
-                elif event_type == "STREAMING_URL":
-                    url = event.get("streaming_url") if isinstance(event, dict) else getattr(event, "url", None)
-                    streaming_url = url  # persist to MongoDB doc
-                    print(f"  🔴 LIVE BROWSER: {url}")
+                elif isinstance(event, StreamingUrlEvent):
+                    streaming_url = event.streaming_url
+                    print(f"  🔴 LIVE BROWSER: {streaming_url}")
                     if task_id and task_store and task_id in task_store:
-                        task_store[task_id]["streaming_url"] = url
+                        task_store[task_id]["streaming_url"] = streaming_url
                         task_store[task_id]["current_check"] = f"{patient['name']} — {payer_name}"
 
-                elif event_type == "PROGRESS":
-                    purpose = event.get("purpose") if isinstance(event, dict) else getattr(event, "action_description", "")
-                    print(f"  ⏳ {purpose}")
+                elif isinstance(event, ProgressEvent):
+                    print(f"  ⏳ {event.purpose}")
 
-                elif event_type == "COMPLETE":
-                    raw = event.get("result") if isinstance(event, dict) else getattr(event, "result_json", None)
+                elif isinstance(event, CompleteEvent):
+                    raw = event.result_json  # dict | None
                     if isinstance(raw, str):
                         result = json.loads(raw)
                     elif isinstance(raw, dict):
