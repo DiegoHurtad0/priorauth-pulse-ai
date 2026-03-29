@@ -9,9 +9,9 @@ import {
 import Link from "next/link";
 
 const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "Patients", icon: Users, active: false },
-  { label: "Alerts", icon: Bell, active: false },
+  { label: "Dashboard", icon: LayoutDashboard, href: "#top" },
+  { label: "Patients", icon: Users, href: "#patients" },
+  { label: "Alerts", icon: Bell, href: "#alerts" },
 ];
 
 export default function DashboardLayout({
@@ -42,18 +42,19 @@ export default function DashboardLayout({
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map(({ label, icon: Icon, active }) => (
-            <button
+          {navItems.map(({ label, icon: Icon, href }) => (
+            <a
               key={label}
+              href={href}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                active
+                label === "Dashboard"
                   ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                   : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
               }`}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
               {label}
-            </button>
+            </a>
           ))}
         </nav>
 

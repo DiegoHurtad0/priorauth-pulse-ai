@@ -158,7 +158,7 @@ export default function DashboardPage() {
   }, [patients]);
 
   return (
-    <div className="flex-1 p-6 space-y-6">
+    <div id="top" className="flex-1 p-6 space-y-6">
       {/* ── Section 1: Metrics ─────────────────── */}
       <MetricsBar metrics={metrics} loading={loading} />
 
@@ -196,7 +196,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Section 3: Patient table ───────────── */}
-      <div>
+      <div id="patients">
         <div className="flex items-center justify-between mb-2">
           <span className="text-slate-400 text-xs">
             {patients.reduce((n, p) => n + p.payers.length, 0)} authorization checks
@@ -296,6 +296,7 @@ export default function DashboardPage() {
       )}
 
       {/* ── Alert toasts ───────────────────────── */}
+      <div id="alerts" />
       {alerts.length > 0 && (
         <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-2 items-end">
           {alerts.map((alert) => (

@@ -6,6 +6,10 @@
   --sidebar-width: 256px;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 * {
   box-sizing: border-box;
 }
