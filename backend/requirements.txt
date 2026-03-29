@@ -10,3 +10,5 @@ pydantic-settings
 anthropic
 pytest
 pytest-asyncio
+pandas
+pyarrow
