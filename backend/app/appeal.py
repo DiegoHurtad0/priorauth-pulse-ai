@@ -73,14 +73,13 @@ Write a complete formal appeal letter that:
 Format as a complete letter ready to send. Be specific, authoritative, and medically precise. The letter should be approximately 400-500 words."""
 
     response = client.messages.create(
-        model="claude-opus-4-6",
-        max_tokens=1500,
-        thinking={"type": "adaptive"},
+        model="claude-opus-4-5",
+        max_tokens=4096,
         messages=[{"role": "user", "content": prompt}],
     )
 
     # Extract text from the response
-    text_blocks = [b.text for b in response.content if b.type == "text"]
+    text_blocks = [b.text for b in response.content if hasattr(b, "text")]
     return "\n\n".join(text_blocks)
 
 
