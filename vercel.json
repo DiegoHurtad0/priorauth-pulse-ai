@@ -5,9 +5,6 @@
   "outputDirectory": "frontend/.next",
   "framework": "nextjs",
   "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@priorauth_api_url"
-  },
   "headers": [
     {
       "source": "/(.*)",
