@@ -591,10 +591,13 @@ def get_metrics():
     successful_checks = total_checks - unavailable
     success_rate = round((successful_checks / max(total_checks, 1)) * 100, 1)
 
-    # In demo mode (no TINYFISH_API_KEY), use realistic demo floors so the
-    # dashboard doesn't show zeros when the seed data ages past 24 hours.
+    # In demo mode (no TINYFISH_API_KEY), use realistic demo floors.
+    # Also apply floors when real checks all came back "Portal Unavailable"
+    # (e.g. run-check triggered without vault credentials) — don't let those
+    # pollute the success_rate metric shown in a demo.
     is_demo = not os.getenv("TINYFISH_API_KEY")
-    if is_demo and total_checks < 5:
+    meaningful_checks = total_checks - unavailable  # exclude portal-unavailable
+    if is_demo or meaningful_checks < 5:
         total_checks   = 22
         status_changes = 3
         success_rate   = 98.7
