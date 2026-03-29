@@ -702,9 +702,13 @@ def get_tinyfish_integration():
             "7 edge case handlers (MFA, cookie banners, session timeout, etc.)",
             "4 strict guardrails (no new auths, no cancellations)",
         ],
-        "vault_credential_ids": list(PAYERS[p]["vault_id"] for p in PAYERS),
+        "vault_credential_ids": [PAYERS[p].get("vault_id", f"cred_{p.lower().replace(' ', '_')}") for p in PAYERS],
         "supported_payers": [
-            {"name": p, "url": PAYERS[p]["url"], "vault_id": PAYERS[p]["vault_id"]}
+            {
+                "name": p,
+                "url": PAYERS[p].get("portal_url", PAYERS[p].get("url", "")),
+                "vault_id": PAYERS[p].get("vault_id", f"cred_{p.lower().replace(' ', '_')}"),
+            }
             for p in PAYERS
         ],
         "concurrency": {
